@@ -85,3 +85,13 @@ _Ainda não há registros._
 - **Resultado:** A API e o formulário foram reproduzidos com sucesso; o cadastro válido retorna HTTP 201. A interface foi ajustada para exibir o campo que falhar na validação HTTP 422.
 - **Validação realizada:** Chamada direta à API local e dois testes Playwright, incluindo cadastro completo pelo navegador, foram aprovados.
 - **Observações:** O HTTP 422 continuará sendo retornado quando o e-mail for inválido/ausente ou quando a senha de cadastro tiver menos de oito caracteres, mas agora a mensagem será compreensível no site.
+
+### 2026-09-21 — Correção dos e-mails locais de exemplo
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Corrigir o endereço administrativo de exemplo que usa o domínio reservado `.local`.
+- **Arquivos afetados:** `LOGS_IA.md`, `.env.example` e `README.md`.
+- **Resultado:** Em andamento.
+- **Validação realizada:** Será incluído um teste para garantir que o exemplo de e-mail seja aceito pelo contrato de autenticação.
+- **Observações:** O domínio `.local` não deve ser usado com validação de e-mail em aplicações web.
