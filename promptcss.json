@@ -1,0 +1,26 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "name": "Atlética Godzilla",
+  "description": "Tokens visuais da loja da Atlética Godzilla UGB, derivados da logo oficial.",
+  "tokens": {
+    "colors": {
+      "ink": "#F7F3FB",
+      "muted": "#B9AEC8",
+      "background": "#0C0A10",
+      "surface": "#15121C",
+      "surfaceAlt": "#211A2C",
+      "line": "#40344D",
+      "primary": "#BD4DFF",
+      "accent": "#FF4FC8",
+      "highlight": "#56E8E9",
+      "success": "#8ADC74",
+      "danger": "#FF7575"
+    },
+    "typography": {
+      "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+      "bodyLineHeight": "1.5"
+    },
+    "radii": { "small": "8px", "medium": "12px", "pill": "999px" },
+    "shadows": { "floating": "0 20px 50px #00000088" }
+  }
+}

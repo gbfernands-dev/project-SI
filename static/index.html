@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Loja oficial da Atlética Godzilla UGB" />
+    <title>Atlética Godzilla | UGB</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Pular para o conteúdo</a>
+    <header class="site-header">
+      <a class="brand" href="/" data-link aria-label="Atlética Godzilla, página inicial">
+        <img src="/assets/logo" alt="Logo da Atlética Godzilla UGB" />
+        <span><strong>Atlética</strong> Godzilla</span>
+      </a>
+      <button id="nav-toggle" class="icon-button mobile-only" aria-expanded="false" aria-label="Abrir menu">☰</button>
+      <nav id="main-nav" aria-label="Principal">
+        <a href="/" data-link>Loja</a>
+        <a href="/sobre" data-link>Sobre</a>
+        <a href="/contato" data-link>Contato</a>
+      </nav>
+      <div class="header-actions">
+        <a id="account-link" href="/conta" data-link class="icon-text" aria-label="Minha conta">◉ <span>Conta</span></a>
+        <a href="/carrinho" data-link class="cart-button" aria-label="Carrinho">🛒 <span id="cart-count">0</span></a>
+      </div>
+    </header>
+    <main id="content" tabindex="-1"></main>
+    <footer class="site-footer">
+      <div><img src="/assets/logo" alt="" /><p>Atlética Godzilla UGB<br />A força que move a faculdade.</p></div>
+      <div><h2>Informações</h2><a href="/privacidade" data-link>Privacidade</a><a href="/trocas" data-link>Trocas e devoluções</a></div>
+      <div><h2>Retirada</h2><p>Após a confirmação, acompanhe o pedido pela sua conta para saber quando ele estará disponível.</p></div>
+    </footer>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/static/js/app.js"></script>
+  </body>
+</html>
