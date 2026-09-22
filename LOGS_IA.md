@@ -82,6 +82,6 @@ _Ainda não há registros._
 - **Responsável:** Assistente de desenvolvimento.
 - **Objetivo:** Identificar e corrigir a resposta HTTP 422 nas rotas de cadastro e login local.
 - **Arquivos afetados:** `LOGS_IA.md`, front-end e autenticação, se necessário.
-- **Resultado:** Em andamento.
-- **Validação realizada:** Será reproduzida uma chamada à API local com o corpo enviado pelo formulário.
-- **Observações:** A alteração será testada antes de ser versionada.
+- **Resultado:** A API e o formulário foram reproduzidos com sucesso; o cadastro válido retorna HTTP 201. A interface foi ajustada para exibir o campo que falhar na validação HTTP 422.
+- **Validação realizada:** Chamada direta à API local e dois testes Playwright, incluindo cadastro completo pelo navegador, foram aprovados.
+- **Observações:** O HTTP 422 continuará sendo retornado quando o e-mail for inválido/ausente ou quando a senha de cadastro tiver menos de oito caracteres, mas agora a mensagem será compreensível no site.

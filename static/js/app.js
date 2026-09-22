@@ -2,6 +2,13 @@ const API = "/api/v1";
 const content = document.querySelector("#content");
 const state = { user: null, csrf: null, cart: { items: [], total_cents: 0 } };
 
+function apiErrorMessage(detail) {
+  if (Array.isArray(detail)) {
+    return detail.map((issue) => `${issue.loc?.at(-1) || "campo"}: ${issue.msg}`).join(" · ");
+  }
+  return typeof detail === "string" ? detail : "Não foi possível concluir esta ação.";
+}
+
 async function applyDesignTokens() {
   try {
     const design = await fetch("/promptcss.json", { cache: "no-store" }).then((response) => response.json());
@@ -26,7 +33,7 @@ async function api(path, options = {}) {
   const response = await fetch(`${API}${path}`, { credentials: "same-origin", ...options, headers });
   if (response.status === 204) return null;
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.detail || "Não foi possível concluir esta ação.");
+  if (!response.ok) throw new Error(apiErrorMessage(data.detail));
   return data;
 }
 
