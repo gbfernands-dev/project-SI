@@ -65,3 +65,13 @@ _Ainda não há registros._
 - **Resultado:** Git for Windows 2.55.0.5 foi instalado, a branch `develop` foi criada a partir de `main` e a implementação inicial foi registrada no commit `0cfb714` (`feat: implementa loja da atletica godzilla`).
 - **Validação realizada:** `git --version` retornou a versão instalada.
 - **Observações:** O diretório não relacionado `human/` foi preservado fora do commit.
+
+### 2026-09-21 — Publicação da branch de desenvolvimento
+
+- **IA/ferramenta:** Codex e Git for Windows.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Publicar a branch `develop` no repositório remoto configurado.
+- **Arquivos afetados:** `LOGS_IA.md` e referências remotas Git.
+- **Resultado:** Em andamento.
+- **Validação realizada:** O remoto será conferido antes do envio.
+- **Observações:** O push dependerá da autenticação já configurada para o remoto `origin`.
