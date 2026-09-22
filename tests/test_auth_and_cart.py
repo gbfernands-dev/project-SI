@@ -15,6 +15,14 @@ def test_customer_can_register_and_add_product_to_cart(client):
     assert added.json()["total_cents"] == product["price_cents"] * 2
 
 
+def test_example_administrator_email_is_accepted(client):
+    response = client.post(
+        "/api/v1/auth/register",
+        json={"name": "Administrador", "email": "admin@godzilla-ugb.com", "password": "segredo123"},
+    )
+    assert response.status_code == 201
+
+
 def test_checkout_and_mock_payment_reduce_stock_once(client):
     register(client)
     product = client.get("/api/v1/products").json()[0]

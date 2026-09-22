@@ -92,6 +92,6 @@ _Ainda não há registros._
 - **Responsável:** Assistente de desenvolvimento.
 - **Objetivo:** Corrigir o endereço administrativo de exemplo que usa o domínio reservado `.local`.
 - **Arquivos afetados:** `LOGS_IA.md`, `.env.example` e `README.md`.
-- **Resultado:** Em andamento.
-- **Validação realizada:** Será incluído um teste para garantir que o exemplo de e-mail seja aceito pelo contrato de autenticação.
+- **Resultado:** Os exemplos passaram a usar `admin@godzilla-ugb.com`, aceito pelo validador da API.
+- **Validação realizada:** Lint aprovado e 9 testes de backend aprovados com 81,72% de cobertura, incluindo cadastro do e-mail administrativo de exemplo.
 - **Observações:** O domínio `.local` não deve ser usado com validação de e-mail em aplicações web.

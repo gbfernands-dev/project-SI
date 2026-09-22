@@ -17,7 +17,7 @@ E-commerce acadêmico da Atlética Godzilla UGB. É um monólito modular: FastAP
 3. Para criar o administrador, execute:
 
    ```powershell
-   docker compose exec -e ADMIN_EMAIL=admin@godzilla.local -e ADMIN_PASSWORD=uma-senha-segura web python -m app.bootstrap
+docker compose exec -e ADMIN_EMAIL=admin@godzilla-ugb.com -e ADMIN_PASSWORD=uma-senha-segura web python -m app.bootstrap
    ```
 
 4. Entre com essa conta em `/conta` e abra o painel administrativo.
