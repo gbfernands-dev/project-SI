@@ -75,3 +75,13 @@ _Ainda não há registros._
 - **Resultado:** A branch `develop` foi publicada com sucesso em `origin/develop`.
 - **Validação realizada:** O remoto `https://github.com/gbfernands-dev/project-SI.git` confirmou a criação da branch e o rastreamento local foi configurado.
 - **Observações:** A branch está pronta para receber pull request para `main` quando a versão for aprovada.
+
+### 2026-09-21 — Diagnóstico da autenticação local
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Identificar e corrigir a resposta HTTP 422 nas rotas de cadastro e login local.
+- **Arquivos afetados:** `LOGS_IA.md`, front-end e autenticação, se necessário.
+- **Resultado:** Em andamento.
+- **Validação realizada:** Será reproduzida uma chamada à API local com o corpo enviado pelo formulário.
+- **Observações:** A alteração será testada antes de ser versionada.
