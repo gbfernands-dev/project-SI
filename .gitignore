@@ -9,3 +9,4 @@ htmlcov/
 static/uploads/
 playwright-report/
 test-results/
+human/

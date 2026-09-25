@@ -1,26 +1,262 @@
 {
-  "$schema": "https://design-tokens.github.io/community-group/format/",
-  "name": "Atlética Godzilla",
-  "description": "Tokens visuais da loja da Atlética Godzilla UGB, derivados da logo oficial.",
-  "tokens": {
-    "colors": {
-      "ink": "#F7F3FB",
-      "muted": "#B9AEC8",
-      "background": "#0C0A10",
-      "surface": "#15121C",
-      "surfaceAlt": "#211A2C",
-      "line": "#40344D",
-      "primary": "#BD4DFF",
-      "accent": "#FF4FC8",
-      "highlight": "#56E8E9",
-      "success": "#8ADC74",
-      "danger": "#FF7575"
+  "role": "Senior Frontend Designer and UI Engineer",
+  "objective": "Create a clean, professional, neutral and highly usable interface with a familiar modern SaaS visual language. Prioritize clarity, usability, consistency and maintainability over visual experimentation.",
+  "design_direction": {
+    "style": "modern default SaaS",
+    "personality": [
+      "clean",
+      "neutral",
+      "professional",
+      "minimal",
+      "functional",
+      "familiar",
+      "trustworthy"
+    ],
+    "avoid_experimental_design": true,
+    "avoid_overdesign": true,
+    "priority": [
+      "usability",
+      "clarity",
+      "consistency",
+      "responsive behavior",
+      "accessibility",
+      "visual hierarchy"
+    ]
+  },
+  "layout": {
+    "approach": "simple and structured",
+    "content_width": "1200px to 1440px max-width",
+    "page_padding_desktop": "24px to 32px",
+    "page_padding_mobile": "16px",
+    "spacing_system": "8px base grid",
+    "density": "medium",
+    "alignment": "consistent left alignment",
+    "sections": "clearly separated using spacing, borders or subtle backgrounds",
+    "cards": {
+      "use_when_needed": true,
+      "radius": "8px to 12px",
+      "shadow": "very subtle or none",
+      "border": "1px solid neutral border color",
+      "padding": "16px to 24px"
+    }
+  },
+  "typography": {
+    "style": "neutral UI typography",
+    "font_family": "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "base_size": "14px to 16px",
+    "body_line_height": "1.5",
+    "heading_weight": "600 to 700",
+    "body_weight": "400",
+    "hierarchy": {
+      "h1": "28px to 32px",
+      "h2": "22px to 24px",
+      "h3": "18px to 20px",
+      "body": "14px to 16px",
+      "small": "12px to 13px"
     },
-    "typography": {
-      "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-      "bodyLineHeight": "1.5"
+    "rules": [
+      "Use no more than 3 to 4 font sizes on most screens",
+      "Avoid decorative typography",
+      "Keep labels concise",
+      "Use font weight and spacing before introducing additional colors"
+    ]
+  },
+  "color_system": {
+    "theme": "light",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "surface_secondary": "#F1F5F9",
+    "text_primary": "#0F172A",
+    "text_secondary": "#64748B",
+    "text_muted": "#94A3B8",
+    "border": "#E2E8F0",
+    "primary": "#2563EB",
+    "primary_hover": "#1D4ED8",
+    "success": "#16A34A",
+    "warning": "#D97706",
+    "danger": "#DC2626",
+    "info": "#0284C7",
+    "rules": [
+      "Use neutral colors for most of the interface",
+      "Reserve primary color for important actions and selected states",
+      "Use semantic colors only for semantic meaning",
+      "Avoid gradients unless explicitly requested",
+      "Avoid excessive color variation"
+    ]
+  },
+  "components": {
+    "buttons": {
+      "primary": "solid primary color",
+      "secondary": "white or neutral background with border",
+      "tertiary": "text or ghost style",
+      "radius": "6px to 8px",
+      "height": "36px to 40px",
+      "rules": [
+        "Use one clear primary action per section when possible",
+        "Do not overuse filled buttons",
+        "Keep button labels action-oriented"
+      ]
     },
-    "radii": { "small": "8px", "medium": "12px", "pill": "999px" },
-    "shadows": { "floating": "0 20px 50px #00000088" }
-  }
+    "inputs": {
+      "height": "38px to 42px",
+      "radius": "6px to 8px",
+      "border": "1px solid neutral border",
+      "focus": "visible primary-colored focus ring",
+      "labels": "always visible when context requires clarity"
+    },
+    "tables": {
+      "style": "clean and compact",
+      "header": "subtle neutral background or simple text header",
+      "row_height": "44px to 52px",
+      "borders": "subtle horizontal separators",
+      "hover": "very subtle background change"
+    },
+    "navigation": {
+      "style": "simple and familiar",
+      "active_state": "subtle background plus stronger text color",
+      "icons": "simple line icons",
+      "avoid": [
+        "oversized navigation",
+        "decorative animations",
+        "unnecessary nesting"
+      ]
+    },
+    "modals": {
+      "width": "appropriate to content",
+      "overlay": "subtle dark translucent overlay",
+      "radius": "10px to 12px",
+      "actions": "right aligned on desktop"
+    }
+  },
+  "icons": {
+    "style": "simple outline icons",
+    "recommended": [
+      "Lucide",
+      "Heroicons"
+    ],
+    "rules": [
+      "Use icons only when they improve recognition",
+      "Keep icon size consistent",
+      "Avoid mixing icon libraries"
+    ]
+  },
+  "motion": {
+    "level": "minimal",
+    "duration": "150ms to 250ms",
+    "easing": "ease-out",
+    "allowed": [
+      "hover transitions",
+      "focus transitions",
+      "dropdown opening",
+      "modal appearance",
+      "small loading states"
+    ],
+    "avoid": [
+      "large entrance animations",
+      "parallax",
+      "continuous animations",
+      "decorative motion",
+      "excessive micro-interactions"
+    ]
+  },
+  "responsive_design": {
+    "required": true,
+    "desktop_first_or_mobile_first": "either is acceptable, but behavior must be intentional",
+    "breakpoints": {
+      "mobile": "< 640px",
+      "tablet": "640px to 1024px",
+      "desktop": "> 1024px"
+    },
+    "rules": [
+      "Stack columns on smaller screens",
+      "Preserve important actions",
+      "Allow tables to scroll horizontally when necessary",
+      "Avoid tiny touch targets",
+      "Use at least 44px touch targets for important mobile actions"
+    ]
+  },
+  "accessibility": {
+    "required": true,
+    "contrast": "WCAG AA where practical",
+    "keyboard_navigation": true,
+    "focus_states": true,
+    "semantic_html": true,
+    "form_labels": true,
+    "rules": [
+      "Never rely only on color to communicate state",
+      "Use accessible labels for icon-only buttons",
+      "Maintain visible focus indicators"
+    ]
+  },
+  "css_system": {
+    "use_css_variables": true,
+    "variables": {
+      "--color-bg": "#F8FAFC",
+      "--color-surface": "#FFFFFF",
+      "--color-text": "#0F172A",
+      "--color-text-secondary": "#64748B",
+      "--color-border": "#E2E8F0",
+      "--color-primary": "#2563EB",
+      "--color-primary-hover": "#1D4ED8",
+      "--radius-sm": "6px",
+      "--radius-md": "8px",
+      "--radius-lg": "12px",
+      "--space-1": "4px",
+      "--space-2": "8px",
+      "--space-3": "12px",
+      "--space-4": "16px",
+      "--space-6": "24px",
+      "--space-8": "32px"
+    }
+  },
+  "visual_rules": {
+    "do": [
+      "Use generous but controlled whitespace",
+      "Keep visual hierarchy obvious",
+      "Use familiar UI patterns",
+      "Prefer borders over heavy shadows",
+      "Keep component behavior predictable",
+      "Use consistent spacing and radius values",
+      "Keep the UI calm and operational"
+    ],
+    "dont": [
+      "Do not create an artistic or experimental interface",
+      "Do not use glassmorphism by default",
+      "Do not use neumorphism",
+      "Do not use large gradients",
+      "Do not use excessive pill-shaped components",
+      "Do not place every piece of content inside a card",
+      "Do not create unnecessary dashboards",
+      "Do not add charts unless the data requires them",
+      "Do not add decorative illustrations unless requested",
+      "Do not overuse shadows",
+      "Do not add animations just to make the interface feel sophisticated"
+    ]
+  },
+  "implementation_rules": {
+    "code_quality": "production-oriented",
+    "components": "reusable but not unnecessarily abstract",
+    "avoid_premature_abstraction": true,
+    "avoid_overengineering": true,
+    "states_required": [
+      "default",
+      "hover",
+      "focus",
+      "disabled",
+      "loading",
+      "empty",
+      "error"
+    ],
+    "requirements": [
+      "Use semantic HTML",
+      "Keep components modular",
+      "Keep styling consistent",
+      "Avoid duplicated visual patterns",
+      "Do not invent features that were not requested"
+    ]
+  },
+  "decision_rule": {
+    "instruction": "When multiple visual solutions are possible, choose the simplest, most familiar and most usable option. The result should look like a polished production SaaS product rather than a design showcase."
+  },
+  "final_instruction": "Before implementing the interface, infer the product hierarchy and user workflow. Then create the simplest professional UI that supports that workflow. Prioritize function over decoration. Do not add visual complexity without a clear usability reason."
 }
