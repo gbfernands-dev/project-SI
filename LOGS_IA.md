@@ -159,3 +159,14 @@ _Ainda não há registros._
 - **Resultado:** Fluxograma vetorial criado com raias para cliente, aplicação, Mercado Pago e administração; inclui catálogo, autenticação, carrinho, reserva atômica, checkout, estados de pagamento, webhook autenticado/idempotente, preparação e retirada.
 - **Validação realizada:** XML analisado com sucesso; `viewBox` confirmado em `1800 × 3660`; IDs verificados como únicos; `git diff --check` aprovado; renderização headless inspecionada visualmente; criação registrada no commit `cebf3a2`.
 - **Observações:** A prévia PNG temporária foi removida. O SVG usa os tokens de cor declarados em `promptcss.json` e representa o fluxo recomendado, inclusive correções ainda pendentes.
+
+### 2026-09-28 — Início da análise de produção e responsabilidades
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Confrontar o fluxo recomendado com o backlog, registrar lacunas e avaliar hospedagem gratuita e integração produtiva com o Mercado Pago.
+- **Solicitação:** Atualizar as pendências ausentes, verificar uma URL gratuita de produção e separar tarefas técnicas das ações exclusivas do responsável pelo projeto.
+- **Arquivos afetados:** `LOGS_IA.md` e `PENDENCIAS_TECNICAS.md`.
+- **Resultado:** Análise comparativa e pesquisa de viabilidade iniciadas.
+- **Validação realizada:** Escopo separado em código/IDE, ações compartilhadas e ações externas exclusivas do responsável.
+- **Observações:** Nenhum deploy, cadastro externo ou uso de credenciais será realizado nesta atividade.
