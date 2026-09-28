@@ -138,3 +138,14 @@ _Ainda não há registros._
 - **Resultado:** Documento criado com 18 pendências priorizadas, resumo de estados, evidências, critérios de aceite, campos de resolução/validação e histórico de atualizações.
 - **Validação realizada:** `git diff --check` aprovado; foram contados 18 itens no resumo e 18 seções detalhadas; criação registrada no commit `d89bb5b`.
 - **Observações:** Nenhum arquivo funcional da aplicação foi alterado. O backlog deve ser atualizado no mesmo commit de cada correção relacionada.
+
+### 2026-09-28 — Início do fluxograma da jornada do usuário
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Representar visualmente a trajetória correta do cliente na loja, incluindo decisões, exceções e integrações.
+- **Solicitação:** Criar um fluxograma SVG com a trajetória do usuário e os casos corretos identificados na análise do código.
+- **Arquivos afetados:** `LOGS_IA.md` e novo SVG em `docs/`.
+- **Resultado:** Modelagem do fluxo iniciada.
+- **Validação realizada:** Escopo definido com quatro raias: cliente, aplicação, Mercado Pago e administração.
+- **Observações:** O diagrama representará o comportamento recomendado após a resolução das pendências, não apenas o comportamento atual.
