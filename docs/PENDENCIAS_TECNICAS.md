@@ -29,7 +29,7 @@ fica documentado para uma eventual evolução comercial.
 | CFG-001 | Alta | Pendente | A | Homologação pode iniciar com configuração incorreta |
 | UI-001 | Alta | Pendente | A | Contrato de tokens visuais está divergente |
 | PAY-003 | Alta | Pendente | C | Pagamento não é conciliado por valor e moeda |
-| CI-001 | Média | Pendente | A | CI não exercita PostgreSQL nem toda a suíte de backend |
+| CI-001 | Média | Em andamento | A | CI precisa ser confirmada com PostgreSQL e a suíte completa |
 | SEC-001 | Média | Pendente | B | Upload confia no MIME informado pelo cliente |
 | SEC-002 | Média | Pendente | B | Há conteúdo persistido inserido no DOM sem escape |
 | DEP-001 | Média | Pendente | B | Dependência vulnerável e dependências de teste na imagem |
@@ -292,19 +292,19 @@ Fontes oficiais consultadas:
 ### CI-001 — Executar a suíte real contra PostgreSQL
 
 - **Prioridade:** Média
-- **Estado:** Pendente
+- **Estado:** Em andamento
 - **Responsável:** Não atribuído
 - **Problema:** A fixture substitui a conexão do workflow por SQLite. A etapa principal também não executa `test_admin_and_payments.py`.
 - **Impacto:** Diferenças de PostgreSQL e regressões administrativas/financeiras podem chegar ao merge.
 - **Evidências:** [`tests/conftest.py`](../tests/conftest.py#L1), [`.github/workflows/ci.yml`](../.github/workflows/ci.yml#L25)
 - **Critérios de aceite:**
-  - [ ] Preservar `DATABASE_URL` do CI ou criar uma suíte específica de integração PostgreSQL.
-  - [ ] Executar todos os testes de backend no workflow.
-  - [ ] Testar migrações no CI.
-  - [ ] Manter cobertura mínima sem ocultar arquivos críticos.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+  - [x] Preservar `DATABASE_URL` do CI ou criar uma suíte específica de integração PostgreSQL.
+  - [x] Executar todos os testes de backend no workflow.
+  - [x] Testar migrações no CI.
+  - [x] Manter cobertura mínima sem ocultar arquivos críticos.
+- **Resolução:** Workflow separado em lint, backend PostgreSQL/Alembic, E2E, build Docker e smoke test opcional da URL pública. A fixture respeita `DATABASE_URL` externa.
+- **Validação:** Configuração revisada localmente; o estado permanecerá `Em andamento` até uma execução verde no GitHub Actions confirmar todos os jobs.
+- **Commit/PR:** `ci: amplia validacoes da aplicacao`.
 
 ### SEC-001 — Validar e normalizar imagens enviadas
 

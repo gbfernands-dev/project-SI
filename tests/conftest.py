@@ -1,7 +1,7 @@
 import os
-os.environ["DATABASE_URL"] = "sqlite+pysqlite:///./test_godzilla.db"
-os.environ["SECRET_KEY"] = "test-secret"
-os.environ["APP_ENV"] = "development"
+os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///./test_godzilla.db")
+os.environ.setdefault("SECRET_KEY", "test-secret")
+os.environ.setdefault("APP_ENV", "development")
 
 import pytest
 from fastapi.testclient import TestClient

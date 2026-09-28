@@ -280,6 +280,25 @@ _Ainda não há registros._
 - **Limitações conhecidas:** Pytest completo não foi executado nesta etapa porque o Python do sistema não possui SQLAlchemy; a suíte será preparada e executada na validação integrada.
 - **Subagents:** Não utilizados.
 
+### 2026-09-28 — Início da ampliação da pipeline CI/CD
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Fazer a automação validar lint, PostgreSQL, migrações, toda a suíte de backend, navegador, imagem Docker e a URL pública quando configurada.
+- **Arquivos potencialmente envolvidos:** `.github/workflows/ci.yml`, `tests/conftest.py`, `docs/PENDENCIAS_TECNICAS.md` e `LOGS_IA.md`.
+- **Abordagem planejada:** Separar responsabilidades em jobs independentes, preservar `DATABASE_URL` fornecida pelo CI e manter o Render como mecanismo de deploy da branch `main`.
+- **Limitações e riscos:** Docker e Python 3.12 não estão disponíveis localmente; a execução integral dependerá do GitHub Actions.
+- **Subagents:** Não utilizados; a mudança possui um único workflow e um ajuste localizado de fixture.
+
+### 2026-09-28 — Conclusão da ampliação da pipeline CI/CD
+
+- **Resultado:** Workflow dividido em lint, backend com PostgreSQL/Alembic, E2E, build Docker e smoke test condicional; a fixture não sobrescreve mais a conexão fornecida pelo CI.
+- **Arquivos alterados:** `.github/workflows/ci.yml`, `tests/conftest.py`, `docs/Gb_tasks.txt`, `docs/PENDENCIAS_TECNICAS.md` e `LOGS_IA.md`.
+- **Testes executados:** Compilação sintática dos arquivos Python e verificação estática das etapas do workflow.
+- **Validações realizadas:** Todos os três arquivos de teste de backend estão no job PostgreSQL; Alembic, Playwright, build Docker e smoke test estão declarados; `git diff --check` aprovado.
+- **Limitações conhecidas:** A instalação das dependências em `.venv` ficou sem resposta do índice de pacotes e foi interrompida de forma controlada. Docker e Python 3.12 não estão disponíveis localmente; `CI-001` permanece `Em andamento` até a primeira execução verde no GitHub Actions.
+- **Subagents:** Não utilizados.
+
 ### 2026-09-28 — Início da limpeza do contexto de build
 
 - **IA/ferramenta:** Codex.

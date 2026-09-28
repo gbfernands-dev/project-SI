@@ -11,6 +11,7 @@ TAREFAS DO RESPONSÁVEL PELO PROJETO
     ADMIN_EMAIL e ADMIN_PASSWORD diretamente no painel do Render.
 [ ] Confirmar o primeiro deploy da branch main.
 [ ] Informar a URL onrender.com gerada, sem compartilhar segredos.
+[ ] Cadastrar essa URL como variável PUBLIC_SITE_URL no GitHub para o smoke test.
 [ ] Executar uma compra completa usando apenas contas e credenciais de teste.
 [ ] Antes da apresentação, acessar a URL com antecedência por causa do cold start.
 
@@ -20,4 +21,3 @@ NÃO FAZER PARA ESTA ENTREGA
 - Não enviar credenciais ou segredos por chat.
 - Não contratar domínio ou hospedagem paga.
 - Não cadastrar cartão real no fluxo de demonstração.
-
