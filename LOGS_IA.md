@@ -117,3 +117,14 @@ _Ainda não há registros._
 - **Resultado:** Revisão concluída. Foram priorizados problemas no ciclo de webhooks e pagamentos, concorrência de estoque, redirecionamento do Checkout Pro, sessões inválidas, migrações, contrato visual, uploads, CI e dependências.
 - **Validação realizada:** Leitura estática do backend, front-end, migrações, testes e arquivos de implantação; compilação sintática de `app/` e `tests/`; validação JSON de `promptcss.json`; consulta à documentação oficial do Mercado Pago; Ruff 0.15.12 executado, com três alertas `UP042`.
 - **Observações:** A suíte Pytest não iniciou porque o Python local 3.11.9 não possui SQLAlchemy. A criação de um ambiente temporário para instalar as dependências foi bloqueada pela política de execução antes de criar arquivos. O projeto declara Python 3.12 e Ruff 0.8.4, portanto os alertas do Ruff local devem ser reconfirmados no ambiente oficial. Nenhuma correção de produto foi aplicada.
+
+### 2026-09-28 — Início do registro das pendências técnicas
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Transformar os achados da revisão técnica em um documento Markdown editável e acompanhável.
+- **Solicitação:** Salvar as questões encontradas em um arquivo Markdown que será atualizado conforme as pendências forem resolvidas.
+- **Arquivos afetados:** `LOGS_IA.md` e novo arquivo `PENDENCIAS_TECNICAS.md`.
+- **Resultado:** Organização do backlog técnico iniciada.
+- **Validação realizada:** Achados da revisão anterior consolidados e priorizados.
+- **Observações:** O documento terá estados, critérios de aceite e campos para registrar resolução e validação.
