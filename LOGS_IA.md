@@ -106,3 +106,14 @@ _Ainda não há registros._
 - **Resultado:** Os exemplos passaram a usar `admin@godzilla-ugb.com`, aceito pelo validador da API.
 - **Validação realizada:** Lint aprovado e 9 testes de backend aprovados com 81,72% de cobertura, incluindo cadastro do e-mail administrativo de exemplo.
 - **Observações:** O domínio `.local` não deve ser usado com validação de e-mail em aplicações web.
+
+### 2026-09-28 — Conclusão da revisão técnica do repositório
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Identificar falhas funcionais, riscos de segurança, problemas de implantação e oportunidades de melhoria.
+- **Solicitação:** Analisar o repositório e reportar falhas ou pontos de melhoria.
+- **Arquivos afetados:** `LOGS_IA.md`; os demais arquivos foram somente inspecionados.
+- **Resultado:** Revisão concluída. Foram priorizados problemas no ciclo de webhooks e pagamentos, concorrência de estoque, redirecionamento do Checkout Pro, sessões inválidas, migrações, contrato visual, uploads, CI e dependências.
+- **Validação realizada:** Leitura estática do backend, front-end, migrações, testes e arquivos de implantação; compilação sintática de `app/` e `tests/`; validação JSON de `promptcss.json`; consulta à documentação oficial do Mercado Pago; Ruff 0.15.12 executado, com três alertas `UP042`.
+- **Observações:** A suíte Pytest não iniciou porque o Python local 3.11.9 não possui SQLAlchemy. A criação de um ambiente temporário para instalar as dependências foi bloqueada pela política de execução antes de criar arquivos. O projeto declara Python 3.12 e Ruff 0.8.4, portanto os alertas do Ruff local devem ser reconfirmados no ambiente oficial. Nenhuma correção de produto foi aplicada.
