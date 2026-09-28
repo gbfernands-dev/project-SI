@@ -241,3 +241,22 @@ _Ainda não há registros._
 - **Validações realizadas:** Linha 348 confirmada como `### Subagents`; estado do Git e espaços em branco revisados.
 - **Limitações conhecidas:** Nenhuma refatoração ou correção funcional foi aplicada neste checkpoint.
 - **Subagents:** Auditoria estrutural somente leitura concluída; nenhuma edição foi delegada.
+
+### 2026-09-28 — Início da organização documental e do planejamento acadêmico
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Organizar a documentação, separar as tarefas exclusivas do aluno e registrar uma pipeline funcional compatível com o escopo acadêmico.
+- **Arquivos potencialmente envolvidos:** `README.md`, `docs/`, `PENDENCIAS_TECNICAS.md`, `RELATORIO_PARA_REVISAO_AGENTE.md` e `LOGS_IA.md`.
+- **Abordagem planejada:** Mover documentos técnicos para `docs/`, corrigir links relativos, criar `Gb_tasks.txt` e `PLANO_IMPLEMENTACAO.md` e reclassificar o backlog sem remover riscos conhecidos.
+- **Limitações e riscos:** Movimentar o backlog altera a base dos links relativos; todos serão verificados antes do commit.
+- **Subagents:** A auditoria estrutural anterior recomendou os movimentos; a implementação e a validação permanecerão com o agente principal.
+
+### 2026-09-28 — Conclusão da organização documental e do planejamento acadêmico
+
+- **Resultado:** Documentação técnica concentrada em `docs/`, tarefas externas resumidas, pipeline funcional registrada e backlog recalibrado para apresentação acadêmica com Mercado Pago sandbox.
+- **Arquivos alterados:** `README.md`, `docs/Gb_tasks.txt`, `docs/PLANO_IMPLEMENTACAO.md`, `docs/PENDENCIAS_TECNICAS.md`, `docs/RELATORIO_PARA_REVISAO_AGENTE.md` e `LOGS_IA.md`.
+- **Testes executados:** Não aplicável a comportamento; validações documentais foram executadas.
+- **Validações realizadas:** 29 itens no resumo e 29 seções detalhadas; links Markdown locais existentes; nenhuma referência local sem o novo prefixo; `git diff --check` aprovado.
+- **Limitações conhecidas:** As credenciais, contas externas e a URL pública ainda dependem das ações descritas em `docs/Gb_tasks.txt`.
+- **Subagents:** O inventário estrutural do subagente foi revisado; os documentos foram editados e validados pelo agente principal.

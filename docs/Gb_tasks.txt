@@ -1,0 +1,23 @@
+TAREFAS DO RESPONSÁVEL PELO PROJETO
+
+[ ] Criar ou autorizar uma conta gratuita no Render.
+[ ] Criar um projeto gratuito no Supabase.
+[ ] Criar no Supabase o bucket público "products".
+[ ] Criar uma aplicação de teste no Mercado Pago.
+[ ] Criar ou identificar vendedor e comprador de teste no Mercado Pago.
+[ ] Autorizar o Render a acessar este repositório no GitHub.
+[ ] Inserir DATABASE_URL, PUBLIC_BASE_URL, MP_ACCESS_TOKEN,
+    MP_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY,
+    ADMIN_EMAIL e ADMIN_PASSWORD diretamente no painel do Render.
+[ ] Confirmar o primeiro deploy da branch main.
+[ ] Informar a URL onrender.com gerada, sem compartilhar segredos.
+[ ] Executar uma compra completa usando apenas contas e credenciais de teste.
+[ ] Antes da apresentação, acessar a URL com antecedência por causa do cold start.
+
+NÃO FAZER PARA ESTA ENTREGA
+
+- Não ativar pagamentos reais.
+- Não enviar credenciais ou segredos por chat.
+- Não contratar domínio ou hospedagem paga.
+- Não cadastrar cartão real no fluxo de demonstração.
+

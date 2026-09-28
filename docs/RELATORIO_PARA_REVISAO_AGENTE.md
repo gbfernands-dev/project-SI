@@ -7,22 +7,17 @@ revisão. O agente revisor deve **verificar cada afirmação diretamente no cód
 ponderar o impacto no uso pretendido e propor uma prioridade. Não aplique alterações
 somente porque um item aparece aqui.
 
-Contexto conhecido: trata-se de uma loja FastAPI, com pagamentos Mercado Pago,
-PostgreSQL/Supabase em produção e uma interface HTML/CSS/JS entregue pela própria
-aplicação. Há fluxo local de demonstração sem credencial Mercado Pago.
+Contexto confirmado: trata-se de um protótipo acadêmico FastAPI, com Mercado
+Pago exclusivamente em sandbox, PostgreSQL/Supabase para homologação e uma
+interface HTML/CSS/JS entregue pela própria aplicação. Não haverá pagamentos
+reais nem operação comercial nesta entrega.
 
-## Decisão de produto necessária antes de propor correções
+## Decisão de produto registrada
 
-Confirme com o responsável uma das alternativas abaixo:
-
-1. **Demonstração acadêmica:** não receberá pagamentos reais nem terá operação de
-   estoque real.
-2. **Venda real:** aceitará dinheiro de clientes e precisa de consistência de
-   estoque, segurança de upload, recuperação de erros e operação de produção.
-
-Essa decisão muda a prioridade dos itens de pagamento, catálogo demonstrativo e
-mock. Caso a resposta não exista, trate o projeto como potencialmente produtivo por
-prudência, mas marque a suposição na recomendação.
+Foi escolhida a **demonstração acadêmica**. Os achados continuam tecnicamente
+válidos, mas devem ser priorizados conforme a classificação `A`, `B` e `C` de
+[`PENDENCIAS_TECNICAS.md`](PENDENCIAS_TECNICAS.md). Riscos exclusivos de venda
+real permanecem documentados como evolução futura.
 
 ## Achados a verificar
 
@@ -154,8 +149,8 @@ prudência, mas marque a suposição na recomendação.
   necessário; não são achado de produto.
 - Não foi encontrado `.env` rastreado nem credencial real no histórico de arquivos
   inspecionado. As senhas em `.env.example`, Docker Compose e CI são exemplos locais.
-- `PENDENCIAS_TECNICAS.md` contém backlog de outra atividade e não foi alterado por
-  esta análise; use-o como contexto, mas não o sobrescreva sem conciliar alterações.
+- `PENDENCIAS_TECNICAS.md` é o backlog consolidado; novos achados devem ser
+  conciliados com os itens existentes antes de criar uma pendência duplicada.
 
 ## Validações realizadas e limites
 
