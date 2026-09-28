@@ -149,3 +149,13 @@ _Ainda não há registros._
 - **Resultado:** Modelagem do fluxo iniciada.
 - **Validação realizada:** Escopo definido com quatro raias: cliente, aplicação, Mercado Pago e administração.
 - **Observações:** O diagrama representará o comportamento recomendado após a resolução das pendências, não apenas o comportamento atual.
+
+### 2026-09-28 — Conclusão do fluxograma da jornada do usuário
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Documentar em SVG a jornada correta do cliente e os principais casos alternativos da loja.
+- **Arquivos afetados:** `docs/fluxograma-jornada-usuario.svg` e `LOGS_IA.md`.
+- **Resultado:** Fluxograma vetorial criado com raias para cliente, aplicação, Mercado Pago e administração; inclui catálogo, autenticação, carrinho, reserva atômica, checkout, estados de pagamento, webhook autenticado/idempotente, preparação e retirada.
+- **Validação realizada:** XML analisado com sucesso; `viewBox` confirmado em `1800 × 3660`; IDs verificados como únicos; `git diff --check` aprovado; renderização headless inspecionada visualmente; criação registrada no commit `cebf3a2`.
+- **Observações:** A prévia PNG temporária foi removida. O SVG usa os tokens de cor declarados em `promptcss.json` e representa o fluxo recomendado, inclusive correções ainda pendentes.
