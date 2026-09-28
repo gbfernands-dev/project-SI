@@ -128,3 +128,13 @@ _Ainda não há registros._
 - **Resultado:** Organização do backlog técnico iniciada.
 - **Validação realizada:** Achados da revisão anterior consolidados e priorizados.
 - **Observações:** O documento terá estados, critérios de aceite e campos para registrar resolução e validação.
+
+### 2026-09-28 — Conclusão do registro das pendências técnicas
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Disponibilizar um backlog editável para acompanhar a resolução dos achados da revisão técnica.
+- **Arquivos afetados:** `PENDENCIAS_TECNICAS.md` e `LOGS_IA.md`.
+- **Resultado:** Documento criado com 18 pendências priorizadas, resumo de estados, evidências, critérios de aceite, campos de resolução/validação e histórico de atualizações.
+- **Validação realizada:** `git diff --check` aprovado; foram contados 18 itens no resumo e 18 seções detalhadas; criação registrada no commit `d89bb5b`.
+- **Observações:** Nenhum arquivo funcional da aplicação foi alterado. O backlog deve ser atualizado no mesmo commit de cada correção relacionada.
