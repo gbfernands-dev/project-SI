@@ -23,6 +23,17 @@ Adicione uma entrada para cada atividade relevante, preenchendo o modelo abaixo.
 
 ## Histórico
 
+### 2026-09-28 — Início da varredura de integridade do código
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Fazer uma varredura completa do repositório para identificar arquivos, código, configurações e informações inválidas, sem contexto ou desnecessárias.
+- **Solicitação:** Analisar e reportar os achados, fazendo perguntas somente quando forem necessárias para interpretar itens ambíguos.
+- **Arquivos afetados:** `LOGS_IA.md`; os arquivos do produto serão somente inspecionados.
+- **Resultado:** Varredura iniciada.
+- **Validação realizada:** Estado inicial do Git e o registro de atividades foram consultados.
+- **Observações:** Há uma alteração preexistente em `PENDENCIAS_TECNICAS.md`, que será preservada e não fará parte deste trabalho.
+
 _Ainda não há registros._
 ### 2026-09-28 — Início da revisão técnica do repositório
 
@@ -180,3 +191,13 @@ _Ainda não há registros._
 - **Resultado:** Backlog ampliado de 18 para 29 itens, com 11 lacunas novas, matriz de responsabilidade, arquitetura gratuita proposta, limitações operacionais e requisitos externos.
 - **Validação realizada:** Resumo e detalhes conferidos com 29 itens cada; links locais validados; 16 referências oficiais de Render, Supabase e Mercado Pago registradas; atualização principal versionada no commit `d30407f`.
 - **Observações:** Render Free + Supabase Free é viável para homologação HTTPS, mas não é recomendado como produção comercial com pagamentos reais devido a cold start, pausas e ausência de garantias operacionais. Uma alteração preexistente de outra atividade em `LOGS_IA.md` foi preservada fora deste commit.
+
+### 2026-09-28 — Conclusão da varredura de integridade do código
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Identificar código, arquivos, configurações e informações inválidas, sem contexto ou desnecessárias.
+- **Arquivos afetados:** `LOGS_IA.md`; código, configuração, dependências, testes e documentação foram somente inspecionados.
+- **Resultado:** Foram identificados riscos críticos no fluxo de pagamento/estoque e no upload, além de inconsistências de produção, API e interface, artefatos locais ignorados e dependências de desenvolvimento instaladas na imagem de produção.
+- **Validação realizada:** Leitura estática integral dos arquivos rastreados; validação JSON de `promptcss.json`; compilação de `app/` e `tests/` concluída; `python -m ruff check .` executado com três alertas `UP042`; `git diff --check` sem erros de espaços.
+- **Observações:** A suíte Pytest não iniciou porque o Python local não possui SQLAlchemy. O commit obrigatório segue pendente: `git add`/`git commit` não puderam criar `.git/index.lock` por permissão negada. A alteração preexistente em `PENDENCIAS_TECNICAS.md` foi preservada.
