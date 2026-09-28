@@ -16,7 +16,7 @@ class Settings:
     supabase_url = os.getenv("SUPABASE_URL", "")
     supabase_service_key = os.getenv("SUPABASE_SERVICE_KEY", "")
     static_dir = ROOT_DIR / "static"
-    logo_path = ROOT_DIR / "Logo_atletica.png"
+    logo_path = static_dir / "assets" / "images" / "logo-atletica.png"
 
     @property
     def is_production(self) -> bool:

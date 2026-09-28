@@ -260,3 +260,22 @@ _Ainda não há registros._
 - **Validações realizadas:** 29 itens no resumo e 29 seções detalhadas; links Markdown locais existentes; nenhuma referência local sem o novo prefixo; `git diff --check` aprovado.
 - **Limitações conhecidas:** As credenciais, contas externas e a URL pública ainda dependem das ações descritas em `docs/Gb_tasks.txt`.
 - **Subagents:** O inventário estrutural do subagente foi revisado; os documentos foram editados e validados pelo agente principal.
+
+### 2026-09-28 — Início da organização do ativo de marca
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Retirar a logo da raiz e colocá-la na estrutura de ativos estáticos sem alterar a rota pública existente.
+- **Arquivos potencialmente envolvidos:** `Logo_atletica.png`, `static/assets/images/`, `app/config.py`, `tests/test_contract.py` e `LOGS_IA.md`.
+- **Abordagem planejada:** Adicionar primeiro um contrato para o novo caminho, confirmar RED, mover o arquivo, ajustar a configuração e confirmar GREEN.
+- **Limitações e riscos:** O Python local não possui SQLAlchemy e Docker não está no PATH; a suíte Pytest pode ficar limitada, mas o contrato de caminho será exercitado diretamente.
+- **Subagents:** Não utilizados; a alteração é pequena e localizada.
+
+### 2026-09-28 — Conclusão da organização do ativo de marca
+
+- **Resultado:** A logo foi movida para `static/assets/images/logo-atletica.png`; a rota `/assets/logo` preserva seu contrato por meio do caminho centralizado em `Settings`.
+- **Arquivos alterados:** `app/config.py`, `tests/test_contract.py`, `static/assets/images/logo-atletica.png`, remoção do caminho antigo `Logo_atletica.png` e `LOGS_IA.md`.
+- **Testes executados:** Contrato do novo caminho confirmado primeiro em RED e depois em GREEN; compilação de `app/config.py` e `tests/test_contract.py` aprovada.
+- **Validações realizadas:** Existência do arquivo, assinatura PNG, referências ao nome antigo e `git diff --check` conferidos.
+- **Limitações conhecidas:** Pytest completo não foi executado nesta etapa porque o Python do sistema não possui SQLAlchemy; a suíte será preparada e executada na validação integrada.
+- **Subagents:** Não utilizados.
