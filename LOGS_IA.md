@@ -170,3 +170,13 @@ _Ainda não há registros._
 - **Resultado:** Análise comparativa e pesquisa de viabilidade iniciadas.
 - **Validação realizada:** Escopo separado em código/IDE, ações compartilhadas e ações externas exclusivas do responsável.
 - **Observações:** Nenhum deploy, cadastro externo ou uso de credenciais será realizado nesta atividade.
+
+### 2026-09-28 — Conclusão da análise de produção e responsabilidades
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Completar o backlog com lacunas do fluxo recomendado e registrar a viabilidade de uma URL pública gratuita e do Mercado Pago.
+- **Arquivos afetados:** `PENDENCIAS_TECNICAS.md` e `LOGS_IA.md`.
+- **Resultado:** Backlog ampliado de 18 para 29 itens, com 11 lacunas novas, matriz de responsabilidade, arquitetura gratuita proposta, limitações operacionais e requisitos externos.
+- **Validação realizada:** Resumo e detalhes conferidos com 29 itens cada; links locais validados; 16 referências oficiais de Render, Supabase e Mercado Pago registradas; atualização principal versionada no commit `d30407f`.
+- **Observações:** Render Free + Supabase Free é viável para homologação HTTPS, mas não é recomendado como produção comercial com pagamentos reais devido a cold start, pausas e ausência de garantias operacionais. Uma alteração preexistente de outra atividade em `LOGS_IA.md` foi preservada fora deste commit.
