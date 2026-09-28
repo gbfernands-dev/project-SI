@@ -436,8 +436,8 @@ Fontes oficiais consultadas:
   - [ ] Instalar apenas dependências de execução na imagem final.
   - [ ] Considerar build em múltiplos estágios e imagem base fixada de forma reproduzível.
   - [ ] Inspecionar o conteúdo final da imagem.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
+- **Resolução:** Parcial: `.dockerignore` passa a excluir Git, segredos, caches, testes e documentação. A separação das dependências de runtime permanece em `DEP-001`.
+- **Validação:** Exclusões verificadas estaticamente; o build Docker será executado pela CI porque Docker não está no PATH local.
 - **Commit/PR:** _A preencher._
 
 ### OPS-002 — Melhorar operação, diagnóstico e limites da API

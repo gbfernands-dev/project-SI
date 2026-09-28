@@ -279,3 +279,22 @@ _Ainda não há registros._
 - **Validações realizadas:** Existência do arquivo, assinatura PNG, referências ao nome antigo e `git diff --check` conferidos.
 - **Limitações conhecidas:** Pytest completo não foi executado nesta etapa porque o Python do sistema não possui SQLAlchemy; a suíte será preparada e executada na validação integrada.
 - **Subagents:** Não utilizados.
+
+### 2026-09-28 — Início da limpeza do contexto de build
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Impedir que arquivos de desenvolvimento, documentação, segredos e caches sejam enviados para o build Docker e limpar artefatos locais regeneráveis.
+- **Arquivos potencialmente envolvidos:** `.dockerignore`, caches ignorados, `docs/PENDENCIAS_TECNICAS.md` e `LOGS_IA.md`.
+- **Abordagem planejada:** Declarar exclusões explícitas, preservar todos os arquivos necessários ao runtime, verificar os alvos e remover somente caches ignorados.
+- **Limitações e riscos:** Docker não está disponível no PATH, portanto o build real será exercitado pela CI; a lista será validada estaticamente nesta etapa.
+- **Subagents:** Não utilizados; os alvos foram identificados na auditoria estrutural já revisada.
+
+### 2026-09-28 — Conclusão da limpeza do contexto de build
+
+- **Resultado:** `.dockerignore` criado para impedir o envio de metadados Git, segredos, caches, testes, documentação e artefatos locais ao build; `OPS-001` recebeu a resolução parcial correspondente.
+- **Arquivos alterados:** `.dockerignore`, `docs/PENDENCIAS_TECNICAS.md` e `LOGS_IA.md`.
+- **Testes executados:** Validação estática das regras e dos arquivos exigidos pelo runtime.
+- **Validações realizadas:** `app`, `static`, `migrations`, `requirements.txt` e `promptcss.json` permanecem no contexto; exclusões sensíveis confirmadas; `git diff --check` aprovado.
+- **Limitações conhecidas:** Docker não está no PATH. A política de execução bloqueou duas tentativas seguras de remover os caches ignorados; eles permanecem apenas localmente, não são versionados nem entram no build.
+- **Subagents:** Não utilizados.
