@@ -23,6 +23,17 @@ Adicione uma entrada para cada atividade relevante, preenchendo o modelo abaixo.
 
 ## Histórico
 
+### 2026-09-28 — Início da documentação da varredura para revisão por agente
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Converter os achados da varredura de integridade em instruções verificáveis para outro agente analisar, ponderar e priorizar.
+- **Solicitação:** Escrever o relatório de modo que um agente possa ler e avaliar as verificações.
+- **Arquivos afetados:** `LOGS_IA.md` e novo documento Markdown de auditoria.
+- **Resultado:** Documentação iniciada.
+- **Validação realizada:** Achados, evidências e limitações da auditoria anterior foram revisados.
+- **Observações:** O documento não aplicará correções de produto.
+
 ### 2026-09-28 — Início da varredura de integridade do código
 
 - **IA/ferramenta:** Codex.
