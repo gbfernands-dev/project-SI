@@ -65,7 +65,12 @@ def test_admin_can_manage_catalog_and_order_lifecycle(client):
     order = client.post("/api/v1/orders/checkout", headers=headers).json()["order"]
     client.post(f"/api/v1/payments/mock/orders/{order['id']}/approve", headers=headers)
     orders = client.get("/api/v1/admin/orders").json()
-    assert any(item["id"] == order["id"] for item in orders)
+    admin_order = next(item for item in orders if item["id"] == order["id"])
+    assert admin_order["user"] == {
+        "id": admin_order["user"]["id"],
+        "name": "Admin Godzilla",
+        "email": "admin@ugb.edu.br",
+    }
     available = client.patch(
         f"/api/v1/admin/orders/{order['id']}/status", headers=headers, json={"status": "available"}
     )
@@ -98,6 +103,41 @@ def test_catalog_filters_security_and_webhook(client, monkeypatch):
     assert response.status_code == 204
     assert client.get(f"/api/v1/orders/{order['id']}").json()["payment_status"] == "approved"
     assert client.post("/api/v1/payments/webhook", json={"data": {"id": "payment-123"}}).status_code == 204
+
+
+def test_admin_orders_identify_different_customers_without_changing_customer_contract(client):
+    order_ids = []
+    customers = [
+        ("Cliente Um", "cliente1@ugb.edu.br"),
+        ("Cliente Dois", "cliente2@ugb.edu.br"),
+    ]
+    for name, email in customers:
+        response = client.post(
+            "/api/v1/auth/register",
+            json={"name": name, "email": email, "password": "segredo123"},
+        )
+        assert response.status_code == 201
+        headers = csrf_headers(client)
+        product = client.get("/api/v1/products").json()[0]
+        client.post(
+            "/api/v1/cart/items",
+            headers=headers,
+            json={"variant_id": product["variants"][0]["id"], "quantity": 1},
+        )
+        order_ids.append(client.post("/api/v1/orders/checkout", headers=headers).json()["order"]["id"])
+        if email == customers[0][1]:
+            client.post("/api/v1/auth/logout", headers=headers)
+
+    promote_to_admin(customers[1][1])
+    customer_orders = client.get("/api/v1/orders").json()
+    assert all("user" not in order for order in customer_orders)
+
+    admin_orders = client.get("/api/v1/admin/orders").json()
+    customers_by_order = {order["id"]: order["user"] for order in admin_orders}
+    assert customers_by_order[order_ids[0]]["name"] == customers[0][0]
+    assert customers_by_order[order_ids[0]]["email"] == customers[0][1]
+    assert customers_by_order[order_ids[1]]["name"] == customers[1][0]
+    assert customers_by_order[order_ids[1]]["email"] == customers[1][1]
 
 
 def test_auth_validation_and_logout(client):

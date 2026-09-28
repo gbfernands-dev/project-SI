@@ -12,7 +12,15 @@ def test_openapi_exposes_versioned_contracts(client):
 def test_design_contract_is_valid_json(client):
     response = client.get("/promptcss.json")
     assert response.status_code == 200
-    assert response.json()["tokens"]["colors"]["primary"] == "#BD4DFF"
+    design = response.json()
+    assert design["schema_version"] == "1.0.0"
+    tokens = design["tokens"]
+    assert tokens["colors"]["primary"] == "#BD4DFF"
+    assert tokens["colors"]["background"] == "#0C0A10"
+    assert tokens["typography"]["fontFamily"].startswith("Inter")
+    assert tokens["radii"]["medium"] == "12px"
+    assert design["color_system"]["primary"] == tokens["colors"]["primary"]
+    assert design["css_system"]["variables"]["--color-primary"] == tokens["colors"]["primary"]
 
 
 def test_logo_uses_the_static_assets_directory(client):

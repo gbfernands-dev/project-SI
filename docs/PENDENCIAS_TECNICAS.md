@@ -24,19 +24,19 @@ fica documentado para uma eventual evolução comercial.
 | PAY-001 | Crítica | Pendente | A | Webhooks posteriores do mesmo pagamento são ignorados |
 | EST-001 | Crítica | Pendente | C | Pagamento pode ser aprovado sem estoque disponível |
 | PAY-002 | Alta | Pendente | A | Checkout precisa permanecer no sandbox |
-| AUTH-001 | Alta | Pendente | A | Cookie de sessão inválido pode causar HTTP 500 |
+| AUTH-001 | Alta | Resolvido | A | Sessão inexistente ou expirada retorna HTTP 401 |
 | DB-001 | Alta | Pendente | A | Migrações não são aplicadas de forma determinística |
 | CFG-001 | Alta | Pendente | A | Homologação pode iniciar com configuração incorreta |
-| UI-001 | Alta | Pendente | A | Contrato de tokens visuais está divergente |
+| UI-001 | Alta | Resolvido | A | Contrato de tokens visuais unificado e versionado |
 | PAY-003 | Alta | Pendente | C | Pagamento não é conciliado por valor e moeda |
 | CI-001 | Média | Em andamento | A | CI precisa ser confirmada com PostgreSQL e a suíte completa |
 | SEC-001 | Média | Pendente | B | Upload confia no MIME informado pelo cliente |
 | SEC-002 | Média | Pendente | B | Há conteúdo persistido inserido no DOM sem escape |
 | DEP-001 | Média | Pendente | B | Dependência vulnerável e dependências de teste na imagem |
-| CART-001 | Média | Pendente | A | Aprovação limpa itens não relacionados do carrinho |
+| CART-001 | Média | Resolvido | A | Checkout remove apenas os itens que originaram o pedido |
 | AUTH-002 | Média | Pendente | C | Faltam limitação de login e limpeza de sessões expiradas |
 | DB-002 | Média | Pendente | B | Integridade numérica depende somente da API |
-| ADM-001 | Média | Pendente | A | Painel não identifica o cliente do pedido |
+| ADM-001 | Média | Resolvido | A | Painel identifica o cliente sem ampliar o contrato comum |
 | OPS-001 | Média | Pendente | B | Contexto e imagem Docker incluem arquivos desnecessários |
 | OPS-002 | Média | Pendente | B | Health check, observabilidade e respostas HTTP são limitados |
 | PAY-004 | Alta | Pendente | A | Contrato do webhook precisa seguir a documentação oficial |
@@ -208,18 +208,18 @@ Fontes oficiais consultadas:
 ### AUTH-001 — Retornar 401 para sessões inexistentes
 
 - **Prioridade:** Alta
-- **Estado:** Pendente
+- **Estado:** Resolvido
 - **Responsável:** Não atribuído
 - **Problema:** O código acessa `session.expires_at` quando a consulta não encontra uma sessão.
 - **Impacto:** Cookie forjado, removido ou antigo pode causar HTTP 500.
 - **Evidência:** [`app/security.py`](../app/security.py#L44)
 - **Critérios de aceite:**
-  - [ ] Verificar `session is None` antes de acessar seus atributos.
-  - [ ] Retornar HTTP 401 de maneira uniforme para sessão inexistente ou expirada.
-  - [ ] Adicionar testes para cookie aleatório, sessão removida e sessão expirada.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+  - [x] Verificar `session is None` antes de acessar seus atributos.
+  - [x] Retornar HTTP 401 de maneira uniforme para sessão inexistente ou expirada.
+  - [x] Adicionar testes para cookie aleatório, sessão removida e sessão expirada.
+- **Resolução:** A ausência da sessão é tratada antes da normalização de `expires_at`; sessão ausente e expirada usam a mesma resposta 401.
+- **Validação:** Casos RED reproduziram o `AttributeError`; casos GREEN cobrem cookie aleatório, registro removido e expiração.
+- **Commit/PR:** `fix: estabiliza jornada academica basica`.
 
 ### DB-001 — Tornar migrações determinísticas e obrigatórias no deploy
 
@@ -258,19 +258,19 @@ Fontes oficiais consultadas:
 ### UI-001 — Unificar a fonte de verdade dos tokens visuais
 
 - **Prioridade:** Alta
-- **Estado:** Pendente
+- **Estado:** Resolvido
 - **Responsável:** Não atribuído
 - **Problema:** `promptcss.json` oferece `color_system` e `css_system`, o navegador procura `tokens.colors` e o teste exige outra estrutura e outra cor. O CSS mantém ainda uma terceira configuração fixa.
 - **Impacto:** Os tokens não são aplicados pelo navegador e o contrato automatizado fica inconsistente.
 - **Evidências:** [`promptcss.json`](../promptcss.json#L64), [`static/js/app.js`](../static/js/app.js#L12), [`static/css/main.css`](../static/css/main.css#L1), [`tests/test_contract.py`](../tests/test_contract.py#L9)
 - **Critérios de aceite:**
-  - [ ] Definir um único schema versionado para `promptcss.json`.
-  - [ ] Fazer JavaScript, CSS e teste consumirem os mesmos nomes e valores.
-  - [ ] Manter fallback explícito apenas para falha de carregamento.
-  - [ ] Validar o schema e a aplicação dos tokens em teste automatizado.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+  - [x] Definir um único schema versionado para `promptcss.json`.
+  - [x] Fazer JavaScript, CSS e teste consumirem os mesmos nomes e valores.
+  - [x] Manter fallback explícito apenas para falha de carregamento.
+  - [x] Validar o schema e a aplicação dos tokens em teste automatizado.
+- **Resolução:** Adicionado schema `1.0.0` com tokens canônicos do tema escuro; direção visual, variáveis CSS, loader e fallbacks usam valores coerentes.
+- **Validação:** Contrato JSON verifica versão, cores, tipografia, raios e coerência das variáveis; suíte de backend aprovada.
+- **Commit/PR:** `fix: estabiliza jornada academica basica`.
 
 ### PAY-003 — Conciliar valor, moeda e pedido no webhook
 
@@ -360,18 +360,18 @@ Fontes oficiais consultadas:
 ### CART-001 — Vincular a limpeza do carrinho ao pedido aprovado
 
 - **Prioridade:** Média
-- **Estado:** Pendente
+- **Estado:** Resolvido
 - **Responsável:** Não atribuído
 - **Problema:** A aprovação remove todos os itens atuais do usuário, inclusive itens adicionados depois da criação do pedido. O mesmo carrinho também pode gerar pedidos pendentes repetidos.
 - **Evidência:** [`app/main.py`](../app/main.py#L322)
 - **Critérios de aceite:**
-  - [ ] Remover ou marcar somente os itens que originaram o pedido.
-  - [ ] Definir comportamento do carrinho logo após o checkout.
-  - [ ] Impedir checkout duplicado causado por repetição da mesma solicitação.
-  - [ ] Testar item adicionado entre checkout e aprovação.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+  - [x] Remover ou marcar somente os itens que originaram o pedido.
+  - [x] Definir comportamento do carrinho logo após o checkout.
+  - [x] Impedir checkout duplicado causado por repetição da mesma solicitação.
+  - [x] Testar item adicionado entre checkout e aprovação.
+- **Resolução:** Os registros usados no pedido são removidos na mesma transação do checkout; a aprovação não executa mais exclusão global por usuário.
+- **Validação:** Carrinho fica vazio após checkout, nova tentativa retorna 400 e itens adicionados posteriormente sobrevivem à aprovação.
+- **Commit/PR:** `fix: estabiliza jornada academica basica`.
 
 ### AUTH-002 — Fortalecer o ciclo de autenticação
 
@@ -410,18 +410,18 @@ Fontes oficiais consultadas:
 ### ADM-001 — Exibir a identificação do cliente no painel
 
 - **Prioridade:** Média
-- **Estado:** Pendente
+- **Estado:** Resolvido
 - **Responsável:** Não atribuído
 - **Problema:** O frontend tenta usar `order.user`, mas `OrderOut` não inclui o usuário; todos os pedidos aparecem como “Cliente”.
 - **Evidências:** [`app/schemas.py`](../app/schemas.py#L116), [`static/js/app.js`](../static/js/app.js#L127)
 - **Critérios de aceite:**
-  - [ ] Criar uma resposta administrativa com os dados mínimos necessários do cliente.
-  - [ ] Não ampliar a resposta usada pelo próprio cliente com dados desnecessários.
-  - [ ] Testar identificação de pedidos de usuários diferentes.
-  - [ ] Registrar se upload e edição de produtos permanecerão somente na API ou serão expostos no painel acadêmico.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+  - [x] Criar uma resposta administrativa com os dados mínimos necessários do cliente.
+  - [x] Não ampliar a resposta usada pelo próprio cliente com dados desnecessários.
+  - [x] Testar identificação de pedidos de usuários diferentes.
+  - [x] Registrar se upload e edição de produtos permanecerão somente na API ou serão expostos no painel acadêmico.
+- **Resolução:** `AdminOrderOut` expõe somente id, nome e e-mail do cliente na rota administrativa. Upload e edição detalhada permanecem somente na API nesta entrega.
+- **Validação:** Testes com dois clientes confirmam o vínculo correto e que as rotas comuns de pedido não receberam o campo `user`.
+- **Commit/PR:** `fix: estabiliza jornada academica basica`.
 
 ### OPS-001 — Reduzir e proteger a imagem Docker
 

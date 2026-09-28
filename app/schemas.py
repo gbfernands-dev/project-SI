@@ -122,6 +122,16 @@ class OrderOut(APIModel):
     items: list[OrderItemOut]
 
 
+class OrderCustomerOut(APIModel):
+    id: int
+    name: str
+    email: EmailStr
+
+
+class AdminOrderOut(OrderOut):
+    user: OrderCustomerOut
+
+
 class CheckoutOut(BaseModel):
     order: OrderOut
     checkout_url: str

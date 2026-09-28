@@ -1,6 +1,7 @@
 import os
 import socket
 import subprocess
+import sys
 import time
 from pathlib import Path
 from uuid import uuid4
@@ -24,8 +25,13 @@ def live_server():
     environment = os.environ.copy()
     database_path = Path(f"e2e_godzilla_{uuid4().hex}.db")
     environment["DATABASE_URL"] = f"sqlite+pysqlite:///./{database_path.name}"
-    process = subprocess.Popen(["python", "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(port)], env=environment)
+    process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(port)],
+        env=environment,
+    )
     for _ in range(50):
+        if process.poll() is not None:
+            raise RuntimeError("Servidor de E2E encerrou antes de ficar disponível.")
         with socket.socket() as sock:
             if sock.connect_ex(("127.0.0.1", port)) == 0:
                 break
@@ -36,4 +42,11 @@ def live_server():
     yield f"http://127.0.0.1:{port}"
     process.terminate()
     process.wait(timeout=5)
-    database_path.unlink(missing_ok=True)
+    for attempt in range(10):
+        try:
+            database_path.unlink(missing_ok=True)
+            break
+        except PermissionError:
+            if attempt == 9:
+                raise
+            time.sleep(0.1)

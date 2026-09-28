@@ -25,6 +25,7 @@ from app.models import (
     User,
 )
 from app.schemas import (
+    AdminOrderOut,
     CartItemCreate,
     CartOut,
     CategoryCreate,
@@ -300,6 +301,8 @@ def checkout(user: User = Depends(require_user), db: Session = Depends(get_db)) 
     db.add(order)
     db.flush()
     checkout_url = create_payment_preference(order.id, payment_items)
+    for cart_item in cart:
+        db.delete(cart_item)
     db.commit()
     db.refresh(order)
     return CheckoutOut(order=order_out(order), checkout_url=checkout_url)
@@ -333,7 +336,6 @@ def approve_order_payment(db: Session, order: Order, payment_id: str) -> None:
     order.payment_status = PaymentStatus.APPROVED
     order.status = OrderStatus.PAID
     order.payment_id = payment_id
-    db.query(CartItem).filter(CartItem.user_id == order.user_id).delete()
 
 
 @app.post("/api/v1/payments/mock/orders/{order_id}/approve", response_model=OrderOut, tags=["payments"])
@@ -458,12 +460,11 @@ async def upload_image(product_id: int, file: UploadFile = File(...), _: User = 
     return get_product_or_404(db, product.id)
 
 
-@app.get("/api/v1/admin/orders", response_model=list[OrderOut], tags=["admin"])
-def admin_orders(_: User = Depends(get_current_user), db: Session = Depends(get_db)) -> list[OrderOut]:
+@app.get("/api/v1/admin/orders", response_model=list[AdminOrderOut], tags=["admin"])
+def admin_orders(_: User = Depends(get_current_user), db: Session = Depends(get_db)) -> list[Order]:
     if _.role != Role.ADMIN:
         raise HTTPException(status_code=403, detail="Acesso administrativo necessário.")
-    orders = db.query(Order).options(joinedload(Order.items)).order_by(Order.created_at.desc()).all()
-    return [order_out(order) for order in orders]
+    return db.query(Order).options(joinedload(Order.items), joinedload(Order.user)).order_by(Order.created_at.desc()).all()
 
 
 @app.patch("/api/v1/admin/orders/{order_id}/status", response_model=OrderOut, tags=["admin"])

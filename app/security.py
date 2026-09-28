@@ -46,8 +46,10 @@ def get_current_session(request: Request, db: Session = Depends(get_db)) -> User
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Autenticação necessária.")
     session = db.query(UserSession).filter(UserSession.token_hash == digest(token)).first()
-    expires_at = session.expires_at.replace(tzinfo=UTC) if session and session.expires_at.tzinfo is None else session.expires_at
-    if not session or expires_at < now_utc():
+    if not session:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sessão expirada.")
+    expires_at = session.expires_at.replace(tzinfo=UTC) if session.expires_at.tzinfo is None else session.expires_at
+    if expires_at < now_utc():
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sessão expirada.")
     return session
 

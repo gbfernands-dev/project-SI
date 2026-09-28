@@ -280,6 +280,25 @@ _Ainda não há registros._
 - **Limitações conhecidas:** Pytest completo não foi executado nesta etapa porque o Python do sistema não possui SQLAlchemy; a suíte será preparada e executada na validação integrada.
 - **Subagents:** Não utilizados.
 
+### 2026-09-28 — Início das correções da jornada acadêmica básica
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Corrigir sessão inválida, preservação do carrinho, contrato administrativo e aplicação dos tokens visuais.
+- **Arquivos potencialmente envolvidos:** `tests/`, `app/security.py`, `app/main.py`, `app/schemas.py`, `promptcss.json`, `static/css/main.css`, `static/js/app.js`, backlog e `LOGS_IA.md`.
+- **Abordagem planejada:** Escrever os casos de regressão primeiro, confirmar RED, implementar correções mínimas, confirmar GREEN e executar a suíte relacionada.
+- **Limitações e riscos:** O ambiente Python local ainda não possui as dependências; será feita nova tentativa controlada no ambiente virtual antes de depender da CI.
+- **Subagents:** Três auditorias somente leitura foram iniciadas para base funcional, banco/deploy e pagamentos; toda mudança será revisada e aplicada pelo agente principal.
+
+### 2026-09-28 — Conclusão das correções da jornada acadêmica básica
+
+- **Resultado:** Sessões inválidas respondem 401, checkout remove somente seus itens, novos itens sobrevivem à aprovação, pedidos administrativos identificam o cliente e os tokens visuais possuem contrato versionado coerente.
+- **Arquivos alterados:** `app/security.py`, `app/main.py`, `app/schemas.py`, `promptcss.json`, `static/css/main.css`, testes, `docs/PENDENCIAS_TECNICAS.md` e `LOGS_IA.md`.
+- **Testes executados:** Quatro falhas RED reproduzidas; cinco casos GREEN direcionados; 14 testes de backend aprovados com 82,67% de cobertura; dois testes Playwright aprovados; Ruff aprovado.
+- **Validações realizadas:** JSON de tokens válido, contratos cliente/admin separados, compilação Python, `git diff --check` e estado do Git revisados.
+- **Limitações conhecidas:** A primeira execução E2E interrompida deixou um banco SQLite ignorado; a política bloqueou sua remoção manual. A fixture foi corrigida para usar o mesmo Python e limpar novas execuções; o artefato não é versionado nem entra no build.
+- **Subagents:** A auditoria `fase_base` confirmou as quatro causas e sugeriu contratos; o agente principal revisou, implementou e testou todas as mudanças. As auditorias de banco e pagamentos foram usadas somente como entrada para as próximas etapas.
+
 ### 2026-09-28 — Início da ampliação da pipeline CI/CD
 
 - **IA/ferramenta:** Codex.
