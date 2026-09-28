@@ -222,3 +222,22 @@ _Ainda não há registros._
 - **Resultado:** Foram identificados riscos críticos no fluxo de pagamento/estoque e no upload, além de inconsistências de produção, API e interface, artefatos locais ignorados e dependências de desenvolvimento instaladas na imagem de produção.
 - **Validação realizada:** Leitura estática integral dos arquivos rastreados; validação JSON de `promptcss.json`; compilação de `app/` e `tests/` concluída; `python -m ruff check .` executado com três alertas `UP042`; `git diff --check` sem erros de espaços.
 - **Observações:** A suíte Pytest não iniciou porque o Python local não possui SQLAlchemy. O commit obrigatório segue pendente: `git add`/`git commit` não puderam criar `.git/index.lock` por permissão negada. A alteração preexistente em `PENDENCIAS_TECNICAS.md` foi preservada.
+
+### 2026-09-28 — Início do checkpoint anterior à reorganização
+
+- **IA/ferramenta:** Codex.
+- **Responsável:** Assistente de desenvolvimento.
+- **Objetivo:** Preservar a nova versão do protocolo de trabalho antes de reorganizar o repositório e implementar a pipeline acadêmica.
+- **Arquivos potencialmente envolvidos:** `AGENTS.md` e `LOGS_IA.md`.
+- **Abordagem planejada:** Validar a versão recebida, registrar o checkpoint e criar o commit solicitado antes de alterar a estrutura do projeto.
+- **Limitações e riscos:** O commit funciona como ponto de restauração; nenhuma refatoração funcional faz parte desta etapa.
+- **Subagents:** Um subagente foi usado somente para auditoria estrutural em modo de leitura; o resultado foi revisado pelo agente principal.
+
+### 2026-09-28 — Conclusão do checkpoint anterior à reorganização
+
+- **Resultado:** A versão de 732 linhas do `AGENTS.md` foi conferida e preparada para versionamento como base da reorganização.
+- **Arquivos alterados:** `AGENTS.md` e `LOGS_IA.md`.
+- **Testes executados:** Não aplicável; esta etapa altera somente instruções e registro.
+- **Validações realizadas:** Linha 348 confirmada como `### Subagents`; estado do Git e espaços em branco revisados.
+- **Limitações conhecidas:** Nenhuma refatoração ou correção funcional foi aplicada neste checkpoint.
+- **Subagents:** Auditoria estrutural somente leitura concluída; nenhuma edição foi delegada.
