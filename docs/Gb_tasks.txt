@@ -1,11 +1,11 @@
 TAREFAS DO RESPONSÁVEL PELO PROJETO
 
-[ ] Criar ou autorizar uma conta gratuita no Render.
-[ ] Criar um projeto gratuito no Supabase.
-[ ] Criar no Supabase o bucket público "products".
+[x] Criar ou autorizar uma conta gratuita no Render.
+[x] Criar um projeto gratuito no Supabase.
+[x] Criar no Supabase o bucket público "products".
 [ ] Criar uma aplicação de teste no Mercado Pago.
 [ ] Criar ou identificar vendedor e comprador de teste no Mercado Pago.
-[ ] Autorizar o Render a acessar este repositório no GitHub.
+[x] Autorizar o Render a acessar este repositório no GitHub.
 [ ] Inserir DATABASE_URL, MP_ACCESS_TOKEN,
     MP_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_KEY,
     ADMIN_EMAIL e ADMIN_PASSWORD diretamente no painel do Render.

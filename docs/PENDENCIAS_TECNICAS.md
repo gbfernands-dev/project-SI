@@ -45,7 +45,7 @@ fica documentado para uma eventual evolução comercial.
 | COM-001 | Média | Pendente | C | Cliente não é notificado quando o pedido fica disponível |
 | DEPLOY-001 | Alta | Em andamento | A | Blueprint preparado; publicação externa ainda depende do responsável |
 | DB-003 | Alta | Em andamento | A | Driver, SSL e pool preparados; validação externa ainda pendente |
-| STO-001 | Média | Pendente | A | Bucket e políticas do Supabase Storage precisam ser configurados |
+| STO-001 | Média | Em andamento | A | Bucket validado; credencial e operações completas ainda pendentes |
 | BIZ-001 | Alta | Risco aceito | C | Textos provisórios são identificados como conteúdo acadêmico |
 | EXT-001 | Alta | Pendente | A | Aplicação e credenciais de teste do Mercado Pago dependem do responsável |
 | EXT-002 | Alta | Pendente | A | Contas e autorizações de Render/Supabase dependem do responsável |
@@ -563,19 +563,19 @@ Fontes oficiais consultadas:
 ### STO-001 — Configurar o bucket de imagens no Supabase
 
 - **Prioridade:** Média
-- **Estado:** Pendente
+- **Estado:** Em andamento
 - **Responsável:** Compartilhado
 - **Problema:** O código espera um bucket público chamado `products`, mas o repositório não o cria nem documenta políticas, tipos aceitos e limite de tamanho no serviço externo.
 - **Impacto:** Uploads podem falhar ou arquivos podem ficar expostos com políticas inadequadas.
 - **Evidências:** [`app/services.py`](../app/services.py#L66), [arquivos públicos no Supabase Storage](https://supabase.com/docs/guides/storage/serving/downloads), [limites de upload](https://supabase.com/docs/guides/storage/uploads/file-limits)
 - **Critérios de aceite:**
-  - [ ] Criar o bucket `products` com decisão explícita sobre acesso público.
-  - [ ] Restringir MIME e tamanho no bucket e também na aplicação.
-  - [ ] Manter `SUPABASE_SERVICE_KEY` somente no backend.
+  - [x] Criar o bucket `products` com decisão explícita sobre acesso público.
+  - [x] Restringir MIME e tamanho no bucket e também na aplicação.
+  - [x] Manter `SUPABASE_SERVICE_KEY` somente no backend.
   - [ ] Testar upload, leitura pública, substituição e remoção segura.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+- **Resolução:** O projeto Supabase possui o bucket público `products`, limitado a 5 MB e aos tipos PNG, JPEG e WebP; a aplicação usa a credencial somente no backend.
+- **Validação:** Consulta somente leitura em `storage.buckets`; teste real de upload permanece pendente até o segredo ser configurado no Render.
+- **Commit/PR:** `docs: registra verificacao externa do deploy`.
 
 ### BIZ-001 — Identificar os textos como conteúdo acadêmico
 

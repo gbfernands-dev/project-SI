@@ -373,12 +373,13 @@ A aplicação foi preparada para homologação no Render por Blueprint: runtime 
 - Alembic: `upgrade head` e `downgrade base` aprovados em banco vazio; DDL PostgreSQL offline compilado com 10 tabelas e 3 enums.
 - Bootstrap administrativo executado duas vezes no mesmo banco, mantendo uma única conta administradora.
 - Conector Render autenticado: dois serviços encontrados; os logs de `project-SI` confirmaram build em Python 3.12 e falha de runtime porque `DATABASE_URL` aponta para `127.0.0.1:5432`.
+- Conector Supabase autenticado: projeto `tivsxuhvvskyhuughcgx` ativo e saudável, banco público ainda vazio e bucket `products` público validado com limite de 5 MB e MIME types PNG/JPEG/WebP.
 
 ### Limitações conhecidas
 - Render CLI e Docker não estão instalados localmente; a validação usou contratos automatizados, parsing YAML, documentação oficial e compilação do fluxo de runtime.
 - O deploy externo ainda não está saudável: é necessário publicar a versão em `main`, substituir a `DATABASE_URL` local pela URL secreta do pooler Supabase, preencher os demais segredos, criar o bucket e validar a URL real.
 - O workspace contém também o serviço antigo `Marketplace-Godzilla`, com comando placeholder de Gunicorn; ele foi preservado porque sua exclusão exige confirmação explícita.
-- A conexão e a reconexão em um projeto Supabase real permanecem pendentes do responsável.
+- A conexão e a reconexão do Render com o projeto Supabase real permanecem pendentes da `DATABASE_URL` secreta correta no Dashboard.
 
 ### Subagents
 - Não utilizados; a investigação e as alterações eram fortemente encadeadas e não ofereciam ganho real de paralelização.
