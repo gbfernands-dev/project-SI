@@ -383,3 +383,48 @@ A aplicação foi preparada para homologação no Render por Blueprint: runtime 
 
 ### Subagents
 - Não utilizados; a investigação e as alterações eram fortemente encadeadas e não ofereciam ganho real de paralelização.
+
+## 2026-10-01 — Complemento da conclusão: ativação externa
+
+### Resultado
+- O serviço Render existente `project-SI` foi conectado ao PostgreSQL do Supabase pelo pooler de sessão IPv4.
+- Foi criado no Supabase o papel técnico exclusivo `render_app`, com acesso ao banco e permissão de uso/criação no schema `public`; sua senha aleatória foi gravada somente em `DATABASE_URL` no ambiente do Render.
+- As variáveis `DATABASE_URL`, `SUPABASE_URL` e `PYTHON_VERSION=3.12.15` foram mescladas no serviço sem substituir os demais segredos existentes.
+- O primeiro deploy de validação (`dep-dav6nem0tbcc73dsv78g`) ficou `live`, executou a migration Alembic e iniciou o Uvicorn na porta `10000`.
+- Os commits `dfad2bd`, `e0bd2d2` e `2fa7465` foram enviados para `origin/develop`, acionando o auto-deploy.
+- O deploy definitivo (`dep-dav6r23m8hqs739gio00`), referente ao commit `2fa7465`, ficou `live` em `https://project-si-lxg5.onrender.com`.
+- O health check `/api/v1/health` respondeu HTTP 200 repetidamente, e a raiz `/` respondeu HTTP 200 após a troca de instância.
+
+### Estado validado no Supabase
+- Migration Alembic atual: `20260921_0001`.
+- Catálogo inicial: 3 produtos.
+- Usuários: 0; administradores: 0.
+- Papel permanente `render_app`: presente.
+- Papel temporário `render_seed_temp`: ausente após revogação e remoção.
+- Bucket `products`: público, limite de 5 MB, aceitando PNG, JPEG e WebP.
+
+### Tentativas de provisionamento administrativo
+- Inserção direta pelo conector SQL e por migration de dados foi recusada pelo Supabase com `INVALID_ARGUMENT`; nenhuma linha foi criada.
+- Uma conexão externa com papel temporário e privilégios limitados foi tentada, mas não concluiu o provisionamento a partir deste ambiente.
+- O papel temporário teve todos os privilégios revogados e foi removido. A consulta final confirmou zero usuários e zero administradores.
+- O provisionamento por gatilho transitório chegou a ser planejado, mas não foi executado porque o usuário solicitou o encerramento, registro e commit do estado atual.
+
+### Arquivos incluídos no encerramento
+- `LOGS_IA.md`.
+- `.agents/skills/supabase/` e `.agents/skills/supabase-postgres-best-practices/`, juntamente com `skills-lock.json`, que já estavam pendentes no workspace e foram incluídos por solicitação de commit de tudo.
+
+### Testes e validações
+- Suíte local previamente executada: 25 testes aprovados, cobertura de 84,15%.
+- Ruff, `compileall`, `git diff --check`, Alembic upgrade/downgrade e DDL PostgreSQL offline: aprovados.
+- Render: deploy definitivo `live`; health check e página inicial com HTTP 200.
+- Supabase: migration, contagens, papéis e ausência de conta parcial verificados por consulta somente leitura.
+- Git: status e diff revisados antes do commit de encerramento.
+
+### Limitações conhecidas
+- O serviço atual ainda usa o comando manual `alembic upgrade head && uvicorn ...`; o comando com `python -m app.bootstrap` está declarado no Blueprint, mas não foi aplicado ao serviço legado pelo conector.
+- Não existe conta administrativa inicial no banco. O catálogo público e o cadastro/login de clientes estão disponíveis.
+- O serviço antigo `Marketplace-Godzilla` foi preservado e não foi alterado.
+- Este commit de encerramento será criado localmente conforme solicitado; nenhum novo push foi solicitado nesta etapa.
+
+### Subagents
+- Não utilizados; as operações externas e suas validações eram sequenciais e dependentes do resultado imediatamente anterior.
