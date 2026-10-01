@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: loja-atletica-godzilla
+    name: project-SI
     runtime: python
     plan: free
     branch: main

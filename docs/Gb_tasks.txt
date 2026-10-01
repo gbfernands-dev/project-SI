@@ -11,8 +11,12 @@ TAREFAS DO RESPONSÁVEL PELO PROJETO
     ADMIN_EMAIL e ADMIN_PASSWORD diretamente no painel do Render.
 [ ] Configurar PUBLIC_BASE_URL somente se usar domínio próprio; no subdomínio
     onrender.com, a aplicação usa RENDER_EXTERNAL_URL automaticamente.
+[ ] No serviço "project-SI", substituir a DATABASE_URL local pela URL do
+    pooler PostgreSQL do Supabase antes do próximo deploy.
 [ ] Confirmar o primeiro deploy da branch main.
 [ ] Informar a URL onrender.com gerada, sem compartilhar segredos.
+[ ] Depois de validar "project-SI", revisar e remover manualmente o serviço
+    antigo "Marketplace-Godzilla" se ele não for mais necessário.
 [ ] Cadastrar essa URL como variável PUBLIC_SITE_URL no GitHub para o smoke test.
 [ ] Executar uma compra completa usando apenas contas e credenciais de teste.
 [ ] Antes da apresentação, acessar a URL com antecedência por causa do cold start.

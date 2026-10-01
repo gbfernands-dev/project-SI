@@ -53,6 +53,7 @@ def test_render_runs_migrations_and_declares_external_configuration():
     service = render["services"][0]
     variables = {item["key"]: item for item in service["envVars"]}
 
+    assert service["name"] == "project-SI"
     assert service["autoDeployTrigger"] == "checksPass"
     assert service["startCommand"].startswith("alembic upgrade head && python -m app.bootstrap &&")
     assert variables["APP_ENV"]["value"] == "production"

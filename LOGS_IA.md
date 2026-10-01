@@ -357,7 +357,7 @@ Investigar a arquitetura, os comandos de build e inicialização, as dependênci
 ## 2026-10-01 — Conclusão
 
 ### Resultado
-A aplicação foi preparada para homologação no Render por Blueprint: runtime Python fixado, deploy condicionado à CI, configuração de produção validada, segredos declarados sem valores, migração e bootstrap administrativo idempotentes executados no startup gratuito e documentação de ativação atualizada. A migração inicial agora é determinística e o E2E reproduz o fluxo Alembic antes de iniciar o servidor.
+A aplicação foi preparada para homologação no Render por Blueprint: runtime Python fixado, deploy condicionado à CI, configuração de produção validada, segredos declarados sem valores, migração e bootstrap administrativo idempotentes executados no startup gratuito e documentação de ativação atualizada. A migração inicial agora é determinística, o E2E reproduz o fluxo Alembic antes de iniciar o servidor e o Blueprint foi alinhado ao serviço existente `project-SI` para não criar um terceiro serviço.
 
 ### Arquivos alterados
 - `render.yaml`, `README.md`, `.env.example`
@@ -372,10 +372,12 @@ A aplicação foi preparada para homologação no Render por Blueprint: runtime 
 - Ruff, `compileall` e `git diff --check`: aprovados.
 - Alembic: `upgrade head` e `downgrade base` aprovados em banco vazio; DDL PostgreSQL offline compilado com 10 tabelas e 3 enums.
 - Bootstrap administrativo executado duas vezes no mesmo banco, mantendo uma única conta administradora.
+- Conector Render autenticado: dois serviços encontrados; os logs de `project-SI` confirmaram build em Python 3.12 e falha de runtime porque `DATABASE_URL` aponta para `127.0.0.1:5432`.
 
 ### Limitações conhecidas
 - Render CLI e Docker não estão instalados localmente; a validação usou contratos automatizados, parsing YAML, documentação oficial e compilação do fluxo de runtime.
-- O deploy externo não foi aplicado: ainda é necessário integrar em `main`, autorizar o repositório no Render, preencher os segredos, criar o bucket Supabase e validar a URL real.
+- O deploy externo ainda não está saudável: é necessário publicar a versão em `main`, substituir a `DATABASE_URL` local pela URL secreta do pooler Supabase, preencher os demais segredos, criar o bucket e validar a URL real.
+- O workspace contém também o serviço antigo `Marketplace-Godzilla`, com comando placeholder de Gunicorn; ele foi preservado porque sua exclusão exige confirmação explícita.
 - A conexão e a reconexão em um projeto Supabase real permanecem pendentes do responsável.
 
 ### Subagents
