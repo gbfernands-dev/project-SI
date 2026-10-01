@@ -25,6 +25,11 @@ def live_server():
     environment = os.environ.copy()
     database_path = Path(f"e2e_godzilla_{uuid4().hex}.db")
     environment["DATABASE_URL"] = f"sqlite+pysqlite:///./{database_path.name}"
+    subprocess.run(
+        [sys.executable, "-m", "alembic", "upgrade", "head"],
+        check=True,
+        env=environment,
+    )
     process = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(port)],
         env=environment,

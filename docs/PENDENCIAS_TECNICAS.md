@@ -25,8 +25,8 @@ fica documentado para uma eventual evolução comercial.
 | EST-001 | Crítica | Pendente | C | Pagamento pode ser aprovado sem estoque disponível |
 | PAY-002 | Alta | Pendente | A | Checkout precisa permanecer no sandbox |
 | AUTH-001 | Alta | Resolvido | A | Sessão inexistente ou expirada retorna HTTP 401 |
-| DB-001 | Alta | Pendente | A | Migrações não são aplicadas de forma determinística |
-| CFG-001 | Alta | Pendente | A | Homologação pode iniciar com configuração incorreta |
+| DB-001 | Alta | Resolvido | A | Migrações determinísticas executadas no comando de deploy |
+| CFG-001 | Alta | Em andamento | A | Configuração validada; bucket externo ainda precisa ser criado |
 | UI-001 | Alta | Resolvido | A | Contrato de tokens visuais unificado e versionado |
 | PAY-003 | Alta | Pendente | C | Pagamento não é conciliado por valor e moeda |
 | CI-001 | Média | Em andamento | A | CI precisa ser confirmada com PostgreSQL e a suíte completa |
@@ -43,8 +43,8 @@ fica documentado para uma eventual evolução comercial.
 | PAY-005 | Média | Resolvido | Decisão | Preferences API será mantida no protótipo acadêmico |
 | ADM-002 | Média | Pendente | C | Preparação e entrega não possuem trilha de auditoria |
 | COM-001 | Média | Pendente | C | Cliente não é notificado quando o pedido fica disponível |
-| DEPLOY-001 | Alta | Pendente | A | Publicação gratuita precisa ser preparada como homologação pública |
-| DB-003 | Alta | Pendente | A | Conexão PostgreSQL do Supabase precisa ser validada para homologação |
+| DEPLOY-001 | Alta | Em andamento | A | Blueprint preparado; publicação externa ainda depende do responsável |
+| DB-003 | Alta | Em andamento | A | Driver, SSL e pool preparados; validação externa ainda pendente |
 | STO-001 | Média | Pendente | A | Bucket e políticas do Supabase Storage precisam ser configurados |
 | BIZ-001 | Alta | Risco aceito | C | Textos provisórios são identificados como conteúdo acadêmico |
 | EXT-001 | Alta | Pendente | A | Aplicação e credenciais de teste do Mercado Pago dependem do responsável |
@@ -224,36 +224,36 @@ Fontes oficiais consultadas:
 ### DB-001 — Tornar migrações determinísticas e obrigatórias no deploy
 
 - **Prioridade:** Alta
-- **Estado:** Pendente
+- **Estado:** Resolvido
 - **Responsável:** Não atribuído
 - **Problema:** A migração inicial chama o metadata atual, a aplicação usa `create_all()` na inicialização e o deploy não executa `alembic upgrade head`.
 - **Impacto:** Bancos existentes podem não receber alterações; bancos novos podem executar uma versão histórica diferente conforme os modelos evoluírem.
 - **Evidências:** [`migrations/versions/20260921_0001_initial_schema.py`](../migrations/versions/20260921_0001_initial_schema.py#L17), [`app/main.py`](../app/main.py#L106), [`render.yaml`](../render.yaml#L7)
 - **Critérios de aceite:**
-  - [ ] Substituir `Base.metadata.create_all/drop_all` da revisão por operações Alembic explícitas.
-  - [ ] Executar `alembic upgrade head` no processo de deploy.
-  - [ ] Remover a criação automática de schema da inicialização normal.
-  - [ ] Testar migração de banco vazio e atualização a partir da revisão anterior.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+  - [x] Substituir `Base.metadata.create_all/drop_all` da revisão por operações Alembic explícitas.
+  - [x] Executar `alembic upgrade head` no processo de deploy.
+  - [x] Remover a criação automática de schema da inicialização normal.
+  - [x] Testar migração de banco vazio e atualização a partir da revisão anterior.
+- **Resolução:** A revisão inicial passou a declarar nove tabelas, índices, enums e chaves explicitamente; o startup da aplicação e o bootstrap dependem do Alembic, executado pelo Blueprint.
+- **Validação:** Teste de contrato da migração e ciclo `upgrade head`/`downgrade base` em banco SQLite vazio.
+- **Commit/PR:** `fix: configura deploy no Render`.
 
 ### CFG-001 — Validar configuração de homologação ao iniciar
 
 - **Prioridade:** Alta
-- **Estado:** Pendente
+- **Estado:** Em andamento
 - **Responsável:** Não atribuído
 - **Problema:** `APP_ENV` usa `development` por padrão e o blueprint da Render não declara as variáveis essenciais. Uma configuração incompleta pode habilitar cookie sem `Secure`, webhook sem assinatura ou URLs apontando para localhost. `SECRET_KEY` é lida, mas atualmente não protege sessões nem outro recurso. Upload local também é efêmero na Render.
 - **Evidências:** [`app/config.py`](../app/config.py#L9), [`render.yaml`](../render.yaml#L1)
 - **Critérios de aceite:**
-  - [ ] Falhar rapidamente na homologação sem banco, URL pública, credenciais de teste e segredo do webhook válidos.
-  - [ ] Rejeitar valores desconhecidos de `APP_ENV`.
-  - [ ] Remover `SECRET_KEY` da configuração ou documentar e testar seu uso efetivo.
+  - [x] Falhar rapidamente na homologação sem banco, URL pública, credenciais de teste e segredo do webhook válidos.
+  - [x] Rejeitar valores desconhecidos de `APP_ENV`.
+  - [x] Remover `SECRET_KEY` da configuração ou documentar e testar seu uso efetivo.
   - [ ] Garantir armazenamento persistente de imagens na homologação.
-  - [ ] Documentar e testar a configuração mínima de deploy.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+  - [x] Documentar e testar a configuração mínima de deploy.
+- **Resolução:** Produção valida PostgreSQL/HTTPS e todas as integrações obrigatórias, normaliza a URL e rejeita fallback de upload em disco. A conclusão depende da criação e validação do bucket externo em `STO-001`.
+- **Validação:** Testes de configuração de produção, Blueprint e fallback de upload aprovados.
+- **Commit/PR:** `fix: configura deploy no Render`.
 
 ### UI-001 — Unificar a fonte de verdade dos tokens visuais
 
@@ -527,38 +527,38 @@ Fontes oficiais consultadas:
 ### DEPLOY-001 — Publicar uma homologação gratuita no Render
 
 - **Prioridade:** Alta
-- **Estado:** Pendente
+- **Estado:** Em andamento
 - **Responsável:** Compartilhado
 - **Problema:** O repositório possui `render.yaml`, mas faltam variáveis declaradas, migração compatível com plano gratuito, banco persistente externo e validação real do build. A branch configurada é `main`, enquanto as mudanças atuais estão em `develop`.
 - **Impacto:** O deploy pode iniciar com SQLite/configuração insegura ou falhar sem criar uma URL utilizável.
 - **Evidências:** [`render.yaml`](../render.yaml#L1), [`app/config.py`](../app/config.py#L9), [Render Free](https://render.com/docs/free)
 - **Critérios de aceite:**
   - [ ] Corrigir os bloqueadores técnicos críticos antes de expor a aplicação.
-  - [ ] Declarar variáveis não secretas e placeholders `sync: false` para segredos.
-  - [ ] Executar migrações idempotentes sem depender de `preDeployCommand` pago.
+  - [x] Declarar variáveis não secretas e placeholders `sync: false` para segredos.
+  - [x] Executar migrações idempotentes sem depender de `preDeployCommand` pago.
   - [ ] Integrar a versão aprovada em `main` e publicar no remoto.
   - [ ] Confirmar URL HTTPS, health/readiness, logs e persistência após reinício.
   - [ ] Rotular o ambiente gratuito como homologação, não produção comercial.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+- **Resolução:** Blueprint fixa Python 3.12.15, aguarda checks da CI, migra e provisiona o administrador de forma idempotente antes de iniciar o FastAPI. Integração em `main`, autorização e primeiro deploy continuam externos.
+- **Validação:** Contrato automatizado do Blueprint, suíte local, lint e ciclo Alembic; validação real da URL permanece pendente.
+- **Commit/PR:** `fix: configura deploy no Render`.
 
 ### DB-003 — Validar a conexão SQLAlchemy com Supabase
 
 - **Prioridade:** Alta
-- **Estado:** Pendente
+- **Estado:** Em andamento
 - **Responsável:** Compartilhado
 - **Problema:** A URL padrão local não representa o pooler do Supabase. É necessário confirmar driver `psycopg`, formato da URL, SSL, limites de conexão e compatibilidade com Alembic.
 - **Impacto:** O serviço pode falhar no boot, esgotar conexões ou executar migrações no endereço errado.
 - **Evidências:** [`app/database.py`](../app/database.py#L7), [`migrations/env.py`](../migrations/env.py#L11), [Supabase com SQLAlchemy](https://supabase.com/docs/guides/troubleshooting/using-sqlalchemy-with-supabase-FUqebT)
 - **Critérios de aceite:**
-  - [ ] Usar URL `postgresql+psycopg` compatível com o pooler e senha corretamente codificada.
-  - [ ] Configurar SSL e pool apropriado para a instância gratuita.
+  - [x] Usar URL `postgresql+psycopg` compatível com o pooler e senha corretamente codificada.
+  - [x] Configurar SSL e pool apropriado para a instância gratuita.
   - [ ] Executar Alembic e suíte de integração em um projeto de homologação.
   - [ ] Validar reconexão após pausa/reinício do Supabase.
-- **Resolução:** _A preencher._
-- **Validação:** _A preencher._
-- **Commit/PR:** _A preencher._
+- **Resolução:** URLs PostgreSQL são normalizadas para `psycopg` com SSL obrigatório e o pool da aplicação foi limitado a duas conexões. A validação no projeto Supabase real permanece externa.
+- **Validação:** Testes locais cobrem normalização, SSL e configuração de produção; conexão e reconexão reais ainda pendentes.
+- **Commit/PR:** `fix: configura deploy no Render`.
 
 ### STO-001 — Configurar o bucket de imagens no Supabase
 

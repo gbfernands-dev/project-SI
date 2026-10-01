@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.config import get_settings
-from app.database import Base, engine, get_db
+from app.database import get_db
 from app.models import (
     CartItem,
     Category,
@@ -106,7 +106,6 @@ def seed_demo_catalog(db: Session) -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
     db = next(get_db())
     try:
         seed_demo_catalog(db)

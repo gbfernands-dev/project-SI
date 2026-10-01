@@ -37,11 +37,25 @@ docker compose exec web pytest --no-cov tests/e2e
 
 ## Homologação acadêmica
 
-O ambiente público planejado usa Render Free, Supabase Free e Mercado Pago em
-sandbox. No painel da Render, configure `APP_ENV=production`, `DATABASE_URL`,
-`SECRET_KEY`, `PUBLIC_BASE_URL`, credenciais **de teste** do Mercado Pago,
-`MP_WEBHOOK_SECRET`, `SUPABASE_URL` e `SUPABASE_SERVICE_KEY`. Crie o bucket
-público `products` no Supabase para os uploads de imagens.
+O ambiente público usa Render Free, PostgreSQL/Storage do Supabase Free e
+Mercado Pago em sandbox. O Blueprint versionado em `render.yaml` fixa Python
+3.12, executa as migrações e o bootstrap administrativo antes de iniciar o
+FastAPI, publica somente a branch `main` e aguarda os checks da CI.
+
+Para criar o serviço:
+
+1. Integre esta versão em `main` e confirme que `render.yaml` está publicado no GitHub.
+2. Crie o bucket público `products` no Supabase.
+3. Abra o [Blueprint no Render](https://dashboard.render.com/blueprint/new?repo=https://github.com/gbfernands-dev/project-SI) e autorize somente este repositório.
+4. Preencha no Dashboard os valores marcados como `sync: false`: `DATABASE_URL`,
+   `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, `SUPABASE_URL`,
+   `SUPABASE_SERVICE_KEY`, `ADMIN_EMAIL` e `ADMIN_PASSWORD`.
+5. Aplique o Blueprint e valide `https://SEU-DOMINIO/api/v1/health`.
+
+Use a URL PostgreSQL do pooler do Supabase em `DATABASE_URL`, credenciais de
+teste do Mercado Pago e a chave `service_role` do Supabase somente no backend.
+O Render fornece `RENDER_EXTERNAL_URL`, usado automaticamente como URL pública;
+defina `PUBLIC_BASE_URL` manualmente apenas se adotar um domínio próprio.
 
 O webhook é `https://SEU-DOMINIO/api/v1/payments/webhook`. O servidor valida a
 assinatura e consulta o pagamento antes de alterar o pedido. Cold start e pausa por

@@ -1,7 +1,7 @@
 """Comando seguro para provisionar a primeira conta administrativa."""
 import os
 
-from app.database import Base, SessionLocal, engine
+from app.database import SessionLocal
 from app.models import Role, User
 from app.security import hash_password
 
@@ -13,7 +13,6 @@ def main() -> None:
         raise SystemExit("Defina ADMIN_EMAIL e ADMIN_PASSWORD antes de executar o bootstrap.")
     if len(password) < 8:
         raise SystemExit("ADMIN_PASSWORD deve ter pelo menos oito caracteres.")
-    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.email == email.lower()).first()

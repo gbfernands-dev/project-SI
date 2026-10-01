@@ -82,6 +82,8 @@ async def save_product_image(file: UploadFile) -> str:
         if not response.ok:
             raise HTTPException(status_code=502, detail="Não foi possível salvar a imagem.")
         return f"{settings.supabase_url}/storage/v1/object/public/products/{filename}"
+    if settings.is_production:
+        raise HTTPException(status_code=503, detail="Armazenamento de imagens ainda não configurado.")
     upload_dir = settings.static_dir / "uploads"
     upload_dir.mkdir(parents=True, exist_ok=True)
     (upload_dir / filename).write_bytes(content)

@@ -336,3 +336,47 @@ _Ainda não há registros._
 - **Validações realizadas:** `app`, `static`, `migrations`, `requirements.txt` e `promptcss.json` permanecem no contexto; exclusões sensíveis confirmadas; `git diff --check` aprovado.
 - **Limitações conhecidas:** Docker não está no PATH. A política de execução bloqueou duas tentativas seguras de remover os caches ignorados; eles permanecem apenas localmente, não são versionados nem entram no build.
 - **Subagents:** Não utilizados.
+
+## 2026-10-01 — Início
+
+### Objetivo
+Configurar a aplicação para implantação no Render.
+
+### Arquivos potencialmente envolvidos
+- render.yaml
+- Arquivos de configuração, inicialização e documentação já existentes, a confirmar após a investigação
+
+### Abordagem
+Investigar a arquitetura, os comandos de build e inicialização, as dependências externas e os testes; escolher o tipo de serviço Render adequado; criar a configuração mínima seguindo TDD; validar testes, lint, type-check, build e Blueprint quando disponíveis; revisar e versionar as alterações.
+
+### Riscos
+- A implantação depende de um repositório remoto compatível e de autenticação no Render.
+- Segredos e integrações externas podem exigir configuração manual no Dashboard.
+- Comandos e serviços necessários ainda precisam ser confirmados na base de código.
+
+## 2026-10-01 — Conclusão
+
+### Resultado
+A aplicação foi preparada para homologação no Render por Blueprint: runtime Python fixado, deploy condicionado à CI, configuração de produção validada, segredos declarados sem valores, migração e bootstrap administrativo idempotentes executados no startup gratuito e documentação de ativação atualizada. A migração inicial agora é determinística e o E2E reproduz o fluxo Alembic antes de iniciar o servidor.
+
+### Arquivos alterados
+- `render.yaml`, `README.md`, `.env.example`
+- `app/bootstrap.py`, `app/config.py`, `app/database.py`, `app/main.py`, `app/services.py`
+- `migrations/versions/20260921_0001_initial_schema.py`
+- `tests/test_config_and_deploy.py`, `tests/e2e/conftest.py`
+- `docs/Gb_tasks.txt`, `docs/PENDENCIAS_TECNICAS.md`, `LOGS_IA.md`
+
+### Testes e validações
+- RED confirmado para política de deploy, bootstrap e migração determinística; a suíte E2E também reproduziu a ausência de tabelas antes do ajuste da fixture.
+- Suíte completa: 25 testes aprovados, cobertura total de 84,15%.
+- Ruff, `compileall` e `git diff --check`: aprovados.
+- Alembic: `upgrade head` e `downgrade base` aprovados em banco vazio; DDL PostgreSQL offline compilado com 10 tabelas e 3 enums.
+- Bootstrap administrativo executado duas vezes no mesmo banco, mantendo uma única conta administradora.
+
+### Limitações conhecidas
+- Render CLI e Docker não estão instalados localmente; a validação usou contratos automatizados, parsing YAML, documentação oficial e compilação do fluxo de runtime.
+- O deploy externo não foi aplicado: ainda é necessário integrar em `main`, autorizar o repositório no Render, preencher os segredos, criar o bucket Supabase e validar a URL real.
+- A conexão e a reconexão em um projeto Supabase real permanecem pendentes do responsável.
+
+### Subagents
+- Não utilizados; a investigação e as alterações eram fortemente encadeadas e não ofereciam ganho real de paralelização.
