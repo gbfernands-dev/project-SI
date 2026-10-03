@@ -553,3 +553,30 @@ Comparar todas as fotos com modelos aos mockups; registrar e remover somente as 
 
 ### Subagents
 - Não utilizados; não houve uma subdivisão independente que superasse o custo de coordenação.
+
+## 2026-10-03 — Publicação e verificação do catálogo Godzilla UGB
+
+### Resultado
+- Commit funcional `1519e0d` enviado à branch `develop`.
+- Deploy automático Render `dep-db0lheqvcj2c739f3h60` concluído como `live` para o mesmo SHA.
+- URL pública validada: `https://project-si-lxg5.onrender.com`.
+- O log do Render confirmou build bem-sucedido, migration PostgreSQL `20260921_0001 -> 20261003_0002`, inicialização completa e health checks HTTP 200.
+
+### Validação externa
+- Página inicial — HTTP 200 e título esperado.
+- `/api/v1/health` — `ok`.
+- `/api/v1/products` — 12 produtos ativos, quatro categorias e 41 imagens de galeria.
+- Primeira imagem WebP do catálogo — HTTP 200 e `Content-Type: image/webp`.
+- Supabase — versão Alembic `20261003_0002`, 12 produtos ativos, 41 linhas em `product_images`, RLS habilitada e sem privilégio `SELECT` para `anon` ou `authenticated`.
+
+### Advisors Supabase
+- Segurança: um aviso informativo `rls_enabled_no_policy` em `product_images`; é intencional, pois a tabela deve permanecer fechada à Data API e é acessada somente pela conexão PostgreSQL server-side proprietária.
+- Performance: a nova FK `product_images.product_id` possui índice. Permanecem quatro avisos preexistentes de FKs sem índice em `cart_items`, `order_items` e `products`, fora do escopo desta integração.
+- O aviso de índice não utilizado para `product_images` é esperado imediatamente após a criação da tabela.
+
+### Limitações
+- A primeira tentativa de consultar a página inicial em PowerShell usou acidentalmente o identificador reservado `$home`; a variável não foi alterada, a consulta falhou sem efeito externo e foi repetida com `$homeResponse` com sucesso.
+- As imagens são entregues pelo próprio serviço Render; o bucket Supabase não foi alterado.
+
+### Subagents
+- Não utilizados.
