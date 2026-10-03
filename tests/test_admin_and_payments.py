@@ -1,5 +1,7 @@
+from app.bootstrap import provision_admin_accounts
 from app.database import SessionLocal
 from app.models import Role, User
+from app.security import verify_password
 from tests.conftest import csrf_headers
 
 
@@ -16,6 +18,29 @@ def promote_to_admin(email="admin@ugb.edu.br"):
     try:
         db.query(User).filter(User.email == email).update({"role": Role.ADMIN})
         db.commit()
+    finally:
+        db.close()
+
+
+def test_bootstrap_provisions_site_and_athletics_administrators():
+    environment = {
+        "ADMIN_EMAIL": "admin@example.com",
+        "ADMIN_PASSWORD": "site-password",
+        "ATHLETICS_ADMIN_EMAIL": "athletics@example.com",
+        "ATHLETICS_ADMIN_PASSWORD": "athletics-password",
+    }
+    db = SessionLocal()
+    try:
+        db.add(User(name="Conta existente", email="athletics@example.com", password_hash="old", role=Role.CUSTOMER))
+        db.commit()
+
+        provision_admin_accounts(db, environment)
+
+        admins = db.query(User).filter(User.email.in_({"admin@example.com", "athletics@example.com"})).all()
+        assert {user.email for user in admins} == {"admin@example.com", "athletics@example.com"}
+        assert all(user.role == Role.ADMIN for user in admins)
+        passwords = {"admin@example.com": "site-password", "athletics@example.com": "athletics-password"}
+        assert all(verify_password(passwords[user.email], user.password_hash) for user in admins)
     finally:
         db.close()
 

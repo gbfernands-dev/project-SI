@@ -49,12 +49,19 @@ function image(product, className = "") {
   return `<img class="${className}" src="${escapeHtml(product.image_url || "/assets/logo")}" alt="${escapeHtml(product.name)}" />`;
 }
 
+function productImages(product) {
+  return product.images?.length ? product.images : [{ url: product.image_url || "/assets/logo", alt_text: product.name, position: 1 }];
+}
+
 function productCard(product) {
-  return `<article class="product-card"><a href="/produto/${encodeURIComponent(product.slug)}" data-link><div class="product-image">${image(product, product.image_url ? "" : "fallback-logo")}</div></a><div class="product-info"><span class="category-label">${escapeHtml(product.category.name)}</span><h3>${escapeHtml(product.name)}</h3><div class="card-footer"><span class="price">${currency(product.price_cents)}</span><a class="text-link" href="/produto/${encodeURIComponent(product.slug)}" data-link>Ver produto →</a></div></div></article>`;
+  const images = productImages(product);
+  const first = images[0];
+  const thumbnails = images.length > 1 ? `<div class="card-gallery-thumbnails" aria-label="Fotos de ${escapeHtml(product.name)}">${images.map((item, index) => `<button class="card-gallery-thumbnail${index === 0 ? " active" : ""}" type="button" data-card-gallery-src="${escapeHtml(item.url)}" data-card-gallery-alt="${escapeHtml(item.alt_text)}" aria-label="Mostrar foto ${item.position} de ${escapeHtml(product.name)}"><img src="${escapeHtml(item.url)}" alt="" /></button>`).join("")}</div>` : "";
+  return `<article class="product-card"><a href="/produto/${encodeURIComponent(product.slug)}" data-link><div class="product-image"><img class="card-gallery-main" src="${escapeHtml(first.url)}" alt="${escapeHtml(first.alt_text)}" /></div></a>${thumbnails}<div class="product-info"><span class="category-label">${escapeHtml(product.category.name)}</span><h3>${escapeHtml(product.name)}</h3><div class="card-footer"><span class="price">${currency(product.price_cents)}</span><a class="text-link" href="/produto/${encodeURIComponent(product.slug)}" data-link>Ver produto →</a></div></div></article>`;
 }
 
 function productGallery(product) {
-  const images = product.images?.length ? product.images : [{ url: product.image_url || "/assets/logo", alt_text: product.name, position: 1 }];
+  const images = productImages(product);
   const first = images[0];
   return `<div class="product-gallery"><div class="product-detail-image"><img id="gallery-main" src="${escapeHtml(first.url)}" alt="${escapeHtml(first.alt_text)}" /></div>${images.length > 1 ? `<div class="gallery-thumbnails" aria-label="Imagens do produto">${images.map((item, index) => `<button class="gallery-thumbnail${index === 0 ? " active" : ""}" type="button" data-gallery-src="${escapeHtml(item.url)}" data-gallery-alt="${escapeHtml(item.alt_text)}" aria-label="Ver imagem ${item.position} de ${escapeHtml(product.name)}"><img src="${escapeHtml(item.url)}" alt="" /></button>`).join("")}</div>` : ""}</div>`;
 }
@@ -80,6 +87,13 @@ async function home() {
     products.innerHTML = "<p class='muted'>Carregando produtos...</p>";
     const data = await api(`/products${params.toString() ? `?${params}` : ""}`);
     products.innerHTML = data.length ? data.map(productCard).join("") : "<div class='empty'>Nenhum produto encontrado com esses filtros.</div>";
+    products.querySelectorAll("[data-card-gallery-src]").forEach((button) => button.addEventListener("click", () => {
+      const card = button.closest(".product-card");
+      const main = card.querySelector(".card-gallery-main");
+      main.src = button.dataset.cardGallerySrc;
+      main.alt = button.dataset.cardGalleryAlt;
+      card.querySelectorAll(".card-gallery-thumbnail").forEach((thumbnail) => thumbnail.classList.toggle("active", thumbnail === button));
+    }));
   }
   await showProducts();
   content.querySelector("#filters").addEventListener("submit", async (event) => { event.preventDefault(); const values = new FormData(event.currentTarget); const params = new URLSearchParams(); for (const [key, value] of values) if (value) params.set(key, value); try { await showProducts(params); } catch (error) { notify(error.message); } });

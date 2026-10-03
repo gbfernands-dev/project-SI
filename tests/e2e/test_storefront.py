@@ -10,6 +10,15 @@ def test_storefront_renders_design_and_catalog(page: Page, live_server):
     page.wait_for_timeout(500)
     products = page.locator("#products")
     assert page.locator(".product-card").count() >= 1, {"errors": errors, "html": products.inner_html()}
+    card_with_gallery = page.locator(".product-card:has(.card-gallery-thumbnail)").first
+    assert card_with_gallery.locator(".card-gallery-thumbnail").count() >= 2
+    card_main_image = card_with_gallery.locator(".product-image img")
+    first_source = card_main_image.get_attribute("src")
+    card_with_gallery.locator(".card-gallery-thumbnail").nth(1).click()
+    assert card_main_image.get_attribute("src") != first_source
+    assert card_with_gallery.locator(".product-image").evaluate(
+        "element => getComputedStyle(element).backgroundColor"
+    ) == "rgb(255, 255, 255)"
     assert not errors
 
 

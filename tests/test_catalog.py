@@ -25,12 +25,13 @@ def test_catalog_uses_mockups_as_source_of_truth():
 def test_storefront_exposes_complete_catalog_with_ordered_gallery(client):
     products = client.get("/api/v1/products").json()
 
-    assert len(products) == 12
+    assert len(products) == 13
     assert {product["category"]["name"] for product in products} == {
         "Acessórios",
         "Camisetas",
         "Esportivo",
         "Moletons e casacos",
+        "Testes",
     }
     official_shirt = next(product for product in products if product["slug"] == "camisa-oficial-godzilla-ugb")
     assert official_shirt["price_cents"] == 8990
@@ -38,6 +39,12 @@ def test_storefront_exposes_complete_catalog_with_ordered_gallery(client):
     assert official_shirt["image_url"] == official_shirt["images"][0]["url"]
     assert [image["position"] for image in official_shirt["images"]] == [1, 2, 3]
     assert any("guia-de-tamanhos" in image["url"] for image in official_shirt["images"])
+
+    payment_test = next(product for product in products if product["slug"] == "testar-pagamento-real")
+    assert payment_test["name"] == "Testar pagamento real"
+    assert payment_test["price_cents"] == 50
+    assert payment_test["image_url"] == "/assets/logo"
+    assert [variant["size"] for variant in payment_test["variants"]] == ["Único"]
 
 
 def test_catalog_assets_are_served_and_keep_the_approved_guides(client):
@@ -50,4 +57,3 @@ def test_catalog_assets_are_served_and_keep_the_approved_guides(client):
         response = client.get(image["url"])
         assert response.status_code == 200, image["url"]
         assert response.headers["content-type"] in {"image/png", "image/webp"}
-

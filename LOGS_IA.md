@@ -580,3 +580,59 @@ Comparar todas as fotos com modelos aos mockups; registrar e remover somente as 
 
 ### Subagents
 - Não utilizados.
+
+## 2026-10-03 — Início da correção da galeria, checkout de teste e administradores
+
+### Objetivo
+Garantir que todas as fotos de cada produto fiquem acessíveis sem fundo em gradiente, adicionar o produto `Testar pagamento real` por R$ 0,50, configurar o Checkout Pro no ambiente de teste do Mercado Pago e criar as contas administrativas do site e da atlética solicitadas.
+
+### Arquivos potencialmente envolvidos
+- `static/index.html`, `static/js/app.js`, `static/css/main.css` e `promptcss.json`.
+- `app/catalog.py`, `app/config.py` e `app/services.py`.
+- `render.yaml`, `.env.example` e testes relacionados.
+- `LOGS_IA.md`.
+
+### Abordagem
+Seguir TDD para tornar a galeria evidente também na listagem, fixar o fundo das áreas de imagem em branco e invalidar assets antigos em cache; incluir o produto de teste no sincronizador idempotente; tornar explícita a seleção entre URL de checkout de teste e produção; validar localmente; criar ou atualizar os administradores diretamente no banco com sessões antigas revogadas; configurar somente os segredos do Mercado Pago no ambiente do Render; publicar e validar a URL externa.
+
+### Riscos e limitações
+- As credenciais fornecidas serão usadas apenas em operações externas e jamais registradas em arquivos versionados ou logs do projeto.
+- A confirmação autenticada de webhooks exige que o segredo configurado no Render corresponda à aplicação do Mercado Pago; isso será verificado até onde os acessos disponíveis permitirem.
+- O valor de R$ 0,50 precisa ser aceito pela API do Mercado Pago no ambiente de teste; o fluxo será exercitado após a publicação.
+
+### Subagents
+- Não utilizados; o trabalho é sequencial e envolve um único fluxo de catálogo, checkout, banco e deploy.
+
+## 2026-10-03 — Conclusão local da galeria, checkout de teste e administradores
+
+### Resultado
+- A vitrine agora mostra miniaturas de todas as imagens de cada produto e permite trocar a imagem principal sem sair da listagem; a galeria detalhada foi preservada.
+- As áreas de imagem e de miniaturas usam o token branco `productImageBackground`, sem gradiente, e os assets de CSS/JavaScript receberam versão para invalidar caches antigos.
+- O produto `Testar pagamento real` foi incluído por R$ 0,50, com tamanho único e imagem institucional.
+- O checkout passou a escolher explicitamente `sandbox_init_point` no ambiente `test` e `init_point` somente no ambiente `production`.
+- O bootstrap administrativo passou a provisionar, promover e atualizar de forma idempotente as contas do site e da atlética usando somente variáveis privadas, além de revogar sessões anteriores.
+- As duas contas solicitadas foram cadastradas como clientes pela API pública; a promoção será concluída automaticamente pelo bootstrap assim que as variáveis privadas e esta versão forem publicadas no Render.
+
+### Arquivos alterados
+- `.env.example`, `render.yaml`.
+- `app/bootstrap.py`, `app/catalog.py`, `app/config.py`, `app/main.py`, `app/services.py`.
+- `static/index.html`, `static/js/app.js`, `static/css/main.css`.
+- `tests/test_catalog.py`, `tests/test_config_and_deploy.py`, `tests/test_admin_and_payments.py`, `tests/e2e/test_storefront.py`.
+- `LOGS_IA.md`.
+
+### TDD e validações
+- RED confirmado para catálogo com 13 produtos, configuração explícita do ambiente Mercado Pago, seleção da URL de checkout, versionamento dos assets, galeria na vitrine e provisionamento de dois administradores.
+- GREEN focado: 17 testes passaram.
+- Suíte completa: 31 testes de unidade/API passaram; cobertura total de 88,57%.
+- E2E Playwright: 3 testes passaram, incluindo troca de imagem na vitrine, troca na página do produto e fundo branco computado.
+- `ruff check app tests scripts` — PASS.
+- `compileall` de `app`, `migrations` e `scripts` — PASS.
+- `git diff --check` — PASS.
+
+### Limitações
+- A primeira execução E2E dentro do sandbox foi impedida por `WinError 5` ao criar o pipe local do Playwright; a mesma suíte passou integralmente fora do sandbox.
+- O conector Supabase permitiu cadastrar as contas pela API, mas recusou a promoção direta com `permission denied`; por isso a promoção foi transferida ao bootstrap idempotente da própria aplicação.
+- A aceitação efetiva do checkout de R$ 0,50 e o retorno do webhook serão verificados após a publicação com as credenciais de teste.
+
+### Subagents
+- Não utilizados; não houve uma subdivisão independente que justificasse o custo de coordenação.

@@ -24,6 +24,7 @@ class Settings:
         ).rstrip("/")
         self.mp_access_token = values.get("MP_ACCESS_TOKEN", "")
         self.mp_webhook_secret = values.get("MP_WEBHOOK_SECRET", "")
+        self.mp_environment = values.get("MP_ENVIRONMENT", "test").lower()
         self.supabase_url = values.get("SUPABASE_URL", "").rstrip("/")
         self.supabase_service_key = values.get("SUPABASE_SERVICE_KEY", "")
         self._validate()
@@ -40,6 +41,8 @@ class Settings:
         return url
 
     def _validate(self) -> None:
+        if self.mp_environment not in {"test", "production"}:
+            raise RuntimeError("MP_ENVIRONMENT deve ser test ou production.")
         if not self.is_production:
             return
         if not self.database_url.startswith("postgresql+psycopg://"):

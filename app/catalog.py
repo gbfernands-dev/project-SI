@@ -14,7 +14,7 @@ LEGACY_DEMO_SLUGS = {"camiseta-godzilla", "moletom-godzilla", "caneca-godzilla"}
 
 @dataclass(frozen=True)
 class CatalogProduct:
-    directory: str
+    directory: str | None
     category_name: str
     category_slug: str
     name: str
@@ -37,6 +37,7 @@ CATALOG = (
     CatalogProduct("10-copo-termico", "Acessórios", "acessorios", "Copo Térmico Godzilla", "copo-termico-godzilla", "Copo térmico preto fosco com aplicação roxa da marca Godzilla UGB e tampa reutilizável. Capacidade de 473 ml.", 4990, ("Único",)),
     CatalogProduct("11-tirante-monster", "Acessórios", "acessorios", "Tirante Dupla Face Godzilla Monster", "tirante-dupla-face-godzilla-monster", "Tirante dupla face vendido separadamente. Uma face roxa destaca a força do mascote; a outra usa base preta e repetição da assinatura Godzilla UGB.", 1990, ("Único",)),
     CatalogProduct("12-tirante-scale", "Acessórios", "acessorios", "Tirante Dupla Face Godzilla Scale", "tirante-dupla-face-godzilla-scale", "Tirante dupla face vendido separadamente. A face externa combina preto e padrão tonal de escamas; a face interna apresenta roxo escuro e assinatura minimalista Godzilla.", 1990, ("Único",)),
+    CatalogProduct(None, "Testes", "testes", "Testar pagamento real", "testar-pagamento-real", "Produto de R$ 0,50 para validar o Checkout Pro no ambiente de teste do Mercado Pago. Nenhuma cobrança real é feita enquanto o checkout estiver configurado como teste.", 50, ("Único",)),
 )
 
 
@@ -80,16 +81,20 @@ def synchronize_catalog(db: Session) -> None:
             if size not in existing_sizes:
                 product.variants.append(ProductVariant(size=size, stock=initial_stock))
 
-        files = image_files(item.directory)
-        product.image_url = image_url(files[0])
-        desired_images = [
-            ProductImage(
-                url=image_url(path),
-                alt_text=f"{item.name} — {path.stem.replace('-', ' ')}",
-                position=position,
-            )
-            for position, path in enumerate(files, start=1)
-        ]
+        files = image_files(item.directory) if item.directory else []
+        desired_images = (
+            [
+                ProductImage(
+                    url=image_url(path),
+                    alt_text=f"{item.name} — {path.stem.replace('-', ' ')}",
+                    position=position,
+                )
+                for position, path in enumerate(files, start=1)
+            ]
+            if files
+            else [ProductImage(url="/assets/logo", alt_text=item.name, position=1)]
+        )
+        product.image_url = desired_images[0].url
         current = [(image.url, image.alt_text, image.position) for image in product.images]
         desired = [(image.url, image.alt_text, image.position) for image in desired_images]
         if current != desired:

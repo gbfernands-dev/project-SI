@@ -32,7 +32,11 @@ def create_payment_preference(order_id: int, items: list[dict]) -> str:
     if not response.ok:
         raise HTTPException(status_code=502, detail="Não foi possível iniciar o pagamento.")
     body = response.json()
-    return body.get("sandbox_init_point") or body["init_point"]
+    checkout_field = "sandbox_init_point" if settings.mp_environment == "test" else "init_point"
+    checkout_url = body.get(checkout_field)
+    if not checkout_url:
+        raise HTTPException(status_code=502, detail="O Mercado Pago não retornou a URL de pagamento esperada.")
+    return checkout_url
 
 
 def get_mercado_pago_payment(payment_id: str) -> dict:

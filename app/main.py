@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.catalog import CATALOG_ROOT, synchronize_catalog
+from app.bootstrap import provision_admin_accounts
 from app.config import get_settings
 from app.database import get_db
 from app.models import (
@@ -75,6 +76,7 @@ async def lifespan(_: FastAPI):
     db = next(get_db())
     try:
         synchronize_catalog(db)
+        provision_admin_accounts(db)
     finally:
         db.close()
     yield
