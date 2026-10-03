@@ -428,3 +428,65 @@ A aplicação foi preparada para homologação no Render por Blueprint: runtime 
 
 ### Subagents
 - Não utilizados; as operações externas e suas validações eram sequenciais e dependentes do resultado imediatamente anterior.
+
+## 2026-10-03 — Início da análise de `catalogo-godzilla-ugb`
+
+### Objetivo
+Analisar a nova pasta `catalogo-godzilla-ugb` e relatar sua estrutura, tecnologias, conteúdo, funcionamento aparente, relação com a aplicação atual e riscos relevantes.
+
+### Arquivos potencialmente envolvidos
+- `catalogo-godzilla-ugb/` (somente leitura).
+- `LOGS_IA.md` (registro obrigatório da tarefa).
+
+### Abordagem
+Inventariar os arquivos, identificar manifests e pontos de entrada, ler configurações e implementações centrais, verificar estado do Git e sintetizar achados sem modificar a nova pasta.
+
+### Riscos e limitações
+- A pasta pode conter artefatos gerados, dependências vendorizadas ou credenciais; a inspeção evitará imprimir valores sensíveis.
+- Não serão executados instaladores, builds ou aplicações sem necessidade para esta análise.
+
+### Subagents
+- Não utilizados; a inspeção é localizada e não oferece ganho real de paralelização.
+
+## 2026-10-03 — Conclusão da análise de `catalogo-godzilla-ugb`
+
+### Resultado
+- A pasta é um pacote de conteúdo, não uma aplicação: contém 12 diretórios de produtos, 50 imagens PNG e dois documentos Markdown.
+- O conjunto de imagens está completo segundo o briefing: seis produtos de vestuário com cinco imagens cada, caneca e copo com duas imagens cada, boné e pochete com cinco imagens cada e dois tirantes com três imagens cada.
+- As imagens estão em formato quadrado RGB sem transparência: mockups/fotos em `1254x1254` e guias em `1200x1200`. Não foram encontrados arquivos corrompidos nem hashes duplicados.
+- O pacote ocupa aproximadamente 77,5 MB; cada arquivo fica abaixo de 2,7 MB e, individualmente, atende ao limite atual de 5 MB do bucket Supabase `products`.
+- `README-produtos.md` define nomes, categorias, descrições, preços e tamanhos. `README-imagens.md` documenta identidade, composição das galerias, ordem de produção e limitações.
+
+### Compatibilidade com a aplicação atual
+- O banco e a API possuem somente `products.image_url`; não existe entidade ou contrato para galeria. A interface também renderiza uma única imagem no card, detalhe e carrinho.
+- O seed atual cria apenas três produtos demonstrativos, enquanto a nova pasta descreve 12 produtos e quatro grupos de categoria.
+- O endpoint administrativo aceita um upload por produto, mas o painel web não oferece fluxo de upload nem importa o catálogo em lote.
+- Para integrar o pacote completo será necessário modelar imagens ordenadas por produto, criar migration e contratos, adaptar a galeria no front-end, estruturar os dados do catálogo e enviar as imagens ao Storage.
+
+### Qualidade visual e riscos encontrados
+- A direção visual é coerente com a paleta preta/roxa e com o mascote existente; fundos e iluminação são consistentes, e os modelos frontal/traseiro geralmente preservam os mesmos personagens.
+- Existem divergências de arte dentro do mesmo produto. Na camisa oficial, o padrão e a ilustração frontal diferem entre mockup isolado e foto com modelos. No moletom, a arte traseira isolada é uma ilustração grande, enquanto a foto com modelos usa um selo menor com texto.
+- O briefing usa o nome institucional `AAA Godzilla UGB`, mas a logo existente e aplicada nos produtos apresenta `A.A.U GODZILLA UGB`; a nomenclatura precisa ser confirmada antes da publicação definitiva.
+- Os guias de medida usam valores plausíveis para o projeto fictício, mas não registram validação de fornecedor ou protótipo físico.
+- Os PNGs fotográficos são pesados para entrega web e têm fundo claro opaco, que aparecerá como quadrado claro sobre o tema escuro. Recomenda-se gerar derivados WebP/AVIF e miniaturas, preservando os originais como fonte.
+- Não há manifesto CSV/JSON nem arquivos-fonte editáveis da arte; somente os PNGs e a documentação humana.
+- O uso público ou comercial do nome/personagem `Godzilla` deve passar por verificação de autorização de marca e direitos; a pasta se declara destinada a um e-commerce acadêmico fictício.
+
+### Arquivos alterados
+- `LOGS_IA.md`.
+- Nenhum arquivo dentro de `catalogo-godzilla-ugb/` foi alterado.
+
+### Testes e validações
+- Inventário de arquivos, extensões, tamanho total e contagem por produto.
+- Leitura integral dos dois documentos Markdown.
+- Abertura e leitura das dimensões de todos os 50 PNGs.
+- Cálculo SHA-256 de todos os PNGs para verificar duplicatas exatas.
+- Inspeção visual de amostras representativas de mockups, modelos, acessórios e guias.
+- Revisão dos modelos, schemas, endpoints administrativos, seed, JavaScript e CSS relacionados a produtos e imagens.
+
+### Limitações
+- A análise não validou medidas com fornecedor, fidelidade para produção têxtil, licenças de marca nem procedência dos arquivos visuais.
+- Nenhum upload, importação de dados, conversão de imagens ou alteração de schema foi executado.
+
+### Subagents
+- Não utilizados.
