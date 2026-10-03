@@ -490,3 +490,66 @@ Inventariar os arquivos, identificar manifests e pontos de entrada, ler configur
 
 ### Subagents
 - Não utilizados.
+
+## 2026-10-03 — Início da integração do catálogo Godzilla UGB
+
+### Objetivo
+Integrar o novo catálogo à aplicação, adotando os mockups como fonte de verdade, removendo fotos de modelos divergentes, padronizando a marca textual como `AAU`, preservando os guias de medidas e convertendo imagens para WebP somente quando houver redução de tamanho.
+
+### Arquivos potencialmente envolvidos
+- `catalogo-godzilla-ugb/` e seus documentos/imagens.
+- `app/models.py`, `app/schemas.py`, `app/main.py`, `app/services.py`.
+- `migrations/versions/`, `static/js/app.js`, `static/css/main.css`.
+- Testes relacionados a catálogo, contratos, administração e E2E.
+- Documentação e `LOGS_IA.md`.
+
+### Abordagem
+Comparar todas as fotos com modelos aos mockups; registrar e remover somente as divergentes; escrever testes RED para galeria ordenada e catálogo completo; criar migration e implementação mínimas; otimizar os PNGs quando WebP for menor; importar dados e arquivos no Supabase; validar localmente; versionar, publicar e monitorar o Render.
+
+### Riscos e limitações
+- A remoção de fotos divergentes é destrutiva, mas foi solicitada explicitamente; os alvos serão resolvidos e listados antes da exclusão.
+- A aplicação atual aceita apenas uma imagem por produto, portanto a galeria exige migration compatível com PostgreSQL e SQLite de testes.
+- Uploads dependem do segredo server-side já configurado no Render; nenhum segredo será gravado no repositório.
+- A pasta do catálogo ainda não está versionada e contém aproximadamente 77,5 MB antes da otimização.
+
+### Subagents
+- Não utilizados; as comparações visuais, a migration, a importação e o deploy dependem sequencialmente umas das outras.
+
+## 2026-10-03 — Conclusão local da integração do catálogo Godzilla UGB
+
+### Resultado
+- Os 12 produtos do catálogo foram integrados com categorias, preços, descrições, tamanhos, estoque inicial e galerias ordenadas.
+- Os mockups foram tratados como fonte de verdade. Nove fotos incompatíveis foram removidas: camisa oficial frente/costas; camiseta oversized costas; moletom frente/costas; corta-vento frente/costas; short costas; pochete em uso.
+- A nomenclatura textual incorreta `AAA` foi corrigida para `AAU`; a assinatura visual estilizada `A.A.U` existente nos mockups foi preservada.
+- Os dez guias aprovados foram mantidos sem alteração em PNG. As 31 imagens fotográficas/mockups restantes foram convertidas para WebP RGB somente por ficarem menores, com economia de 53,83 MiB e fundo claro opaco preservado.
+- A pasta passou de aproximadamente 77,5 MB/50 imagens para 5,44 MB/41 imagens, já descontadas as nove fotos divergentes.
+- Foi criada a tabela `product_images`, com FK em `products`, posição positiva, unicidade por produto/posição, índice da FK, exclusão em cascata e RLS habilitada no PostgreSQL sem acesso aos papéis `anon` e `authenticated`.
+- A API agora entrega galerias; a página de produto permite trocar imagens e cards/galeria usam o token de fundo branco registrado em `promptcss.json`.
+- O sincronizador do catálogo é idempotente, preserva estoque existente e desativa os três produtos demonstrativos antigos sem afetar produtos administrativos reais.
+
+### Arquivos alterados
+- `app/catalog.py`, `app/main.py`, `app/models.py`, `app/schemas.py`.
+- `migrations/versions/20261003_0002_product_gallery.py`.
+- `static/js/app.js`, `static/css/main.css`, `promptcss.json`.
+- `catalogo-godzilla-ugb/` (documentação e imagens finais).
+- `scripts/optimize_catalog_images.py`, `requirements.txt`.
+- `tests/test_catalog.py`, `tests/test_admin_and_payments.py`, `tests/e2e/test_storefront.py`.
+- `LOGS_IA.md`.
+
+### TDD e validações
+- RED confirmado: três testes do catálogo falharam inicialmente por haver fotos divergentes, somente três produtos e ausência do contrato `images`.
+- GREEN: 26 testes de unidade/API passaram com cobertura de 85,53%.
+- E2E: três testes Playwright passaram, incluindo troca de miniatura e fundo branco computado.
+- Migration `20260921_0001 -> 20261003_0002` aplicada com sucesso em banco SQLite limpo durante o E2E.
+- `ruff check app tests scripts` — PASS.
+- `promptcss.json` validado como JSON; `compileall` de `app`, `migrations` e `scripts` — PASS.
+- Todas as 41 imagens finais foram abertas e confirmadas como RGB; 31 WebP e dez guias PNG.
+- `git diff --check` — PASS.
+
+### Limitações
+- O `ruff format --check` global continua apontando 15 arquivos preexistentes fora do padrão; eles não foram reformatados para evitar uma alteração ampla e não relacionada.
+- As imagens do catálogo são empacotadas e servidas pelo Render; o Supabase permanece como banco da aplicação. Isso evita copiar a chave `service_role` para ferramentas locais e mantém a implantação reproduzível pelo Git.
+- A publicação no Render e a verificação do PostgreSQL Supabase serão registradas após o commit e o deploy.
+
+### Subagents
+- Não utilizados; não houve uma subdivisão independente que superasse o custo de coordenação.

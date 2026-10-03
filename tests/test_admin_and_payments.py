@@ -86,7 +86,10 @@ def test_catalog_filters_security_and_webhook(client, monkeypatch):
     headers = csrf_headers(client)
     products = client.get("/api/v1/products?q=camiseta&size=M&min_price=1&max_price=10000")
     assert products.status_code == 200
-    assert products.json()[0]["name"] == "Camiseta Godzilla"
+    assert {product["name"] for product in products.json()} == {
+        "Camiseta Essential Godzilla",
+        "Camiseta Oversized Godzilla Core",
+    }
     assert client.post("/api/v1/cart/items", json={"variant_id": 1, "quantity": 1}).status_code == 403
     assert client.delete("/api/v1/cart/items/999", headers=headers).status_code == 404
     assert client.get("/api/v1/admin/orders").status_code == 403

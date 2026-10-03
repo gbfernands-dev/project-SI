@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import mimetypes
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile, status
@@ -8,6 +9,7 @@ from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.catalog import CATALOG_ROOT, synchronize_catalog
 from app.config import get_settings
 from app.database import get_db
 from app.models import (
@@ -65,50 +67,14 @@ from app.services import (
 
 
 settings = get_settings()
-
-
-def seed_demo_catalog(db: Session) -> None:
-    if db.query(Category).count():
-        return
-    vestuario = Category(name="Vestuário", slug="vestuario")
-    acessorios = Category(name="Acessórios", slug="acessorios")
-    db.add_all([vestuario, acessorios])
-    db.flush()
-    products = [
-        Product(
-            category=vestuario,
-            name="Camiseta Godzilla",
-            slug="camiseta-godzilla",
-            description="Camiseta oficial demonstrativa da Atlética Godzilla.",
-            price_cents=6500,
-            variants=[ProductVariant(size=size, stock=10) for size in ("P", "M", "G", "GG")],
-        ),
-        Product(
-            category=vestuario,
-            name="Moletom Godzilla",
-            slug="moletom-godzilla",
-            description="Moletom demonstrativo para os dias de jogo.",
-            price_cents=12900,
-            variants=[ProductVariant(size=size, stock=6) for size in ("M", "G", "GG")],
-        ),
-        Product(
-            category=acessorios,
-            name="Caneca Godzilla",
-            slug="caneca-godzilla",
-            description="Caneca demonstrativa com a energia da Atlética Godzilla.",
-            price_cents=3500,
-            variants=[ProductVariant(size="Único", stock=20)],
-        ),
-    ]
-    db.add_all(products)
-    db.commit()
+mimetypes.add_type("image/webp", ".webp")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     db = next(get_db())
     try:
-        seed_demo_catalog(db)
+        synchronize_catalog(db)
     finally:
         db.close()
     yield
@@ -121,10 +87,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.mount("/static", StaticFiles(directory=settings.static_dir), name="static")
+app.mount("/catalog-assets", StaticFiles(directory=CATALOG_ROOT), name="catalog-assets")
 
 
 def product_query(db: Session):
-    return db.query(Product).options(joinedload(Product.category), joinedload(Product.variants))
+    return db.query(Product).options(
+        joinedload(Product.category), joinedload(Product.variants), joinedload(Product.images)
+    )
 
 
 def get_product_or_404(db: Session, product_id: int) -> Product:
@@ -137,7 +106,11 @@ def get_product_or_404(db: Session, product_id: int) -> Product:
 def cart_response(db: Session, user_id: int) -> CartOut:
     records = (
         db.query(CartItem)
-        .options(joinedload(CartItem.variant).joinedload(ProductVariant.product).joinedload(Product.category), joinedload(CartItem.variant).joinedload(ProductVariant.product).joinedload(Product.variants))
+        .options(
+            joinedload(CartItem.variant).joinedload(ProductVariant.product).joinedload(Product.category),
+            joinedload(CartItem.variant).joinedload(ProductVariant.product).joinedload(Product.variants),
+            joinedload(CartItem.variant).joinedload(ProductVariant.product).joinedload(Product.images),
+        )
         .filter(CartItem.user_id == user_id)
         .all()
     )
@@ -211,7 +184,14 @@ def logout(response: Response, session: UserSession = Depends(verify_csrf), db: 
 
 @app.get("/api/v1/categories", response_model=list[CategoryOut], tags=["catalog"])
 def list_categories(db: Session = Depends(get_db)) -> list[Category]:
-    return db.query(Category).order_by(Category.name).all()
+    return (
+        db.query(Category)
+        .join(Category.products)
+        .filter(Product.is_active.is_(True))
+        .order_by(Category.name)
+        .distinct()
+        .all()
+    )
 
 
 @app.get("/api/v1/products", response_model=list[ProductOut], tags=["catalog"])

@@ -14,7 +14,7 @@ async function applyDesignTokens() {
     const design = await fetch("/promptcss.json", { cache: "no-store" }).then((response) => response.json());
     const root = document.documentElement;
     const colors = design.tokens?.colors || {};
-    const map = { ink: "ink", muted: "muted", background: "background", surface: "surface", surfaceAlt: "surface-2", line: "line", primary: "violet", accent: "pink", highlight: "aqua", success: "green", danger: "danger" };
+    const map = { ink: "ink", muted: "muted", background: "background", surface: "surface", surfaceAlt: "surface-2", line: "line", primary: "violet", accent: "pink", highlight: "aqua", success: "green", danger: "danger", productImageBackground: "product-image-background" };
     Object.entries(map).forEach(([token, property]) => { if (colors[token]) root.style.setProperty(`--${property}`, colors[token]); });
     if (design.tokens?.typography?.fontFamily) root.style.setProperty("--font-family", design.tokens.typography.fontFamily);
     if (design.tokens?.radii?.small) root.style.setProperty("--radius-small", design.tokens.radii.small);
@@ -53,6 +53,12 @@ function productCard(product) {
   return `<article class="product-card"><a href="/produto/${encodeURIComponent(product.slug)}" data-link><div class="product-image">${image(product, product.image_url ? "" : "fallback-logo")}</div></a><div class="product-info"><span class="category-label">${escapeHtml(product.category.name)}</span><h3>${escapeHtml(product.name)}</h3><div class="card-footer"><span class="price">${currency(product.price_cents)}</span><a class="text-link" href="/produto/${encodeURIComponent(product.slug)}" data-link>Ver produto →</a></div></div></article>`;
 }
 
+function productGallery(product) {
+  const images = product.images?.length ? product.images : [{ url: product.image_url || "/assets/logo", alt_text: product.name, position: 1 }];
+  const first = images[0];
+  return `<div class="product-gallery"><div class="product-detail-image"><img id="gallery-main" src="${escapeHtml(first.url)}" alt="${escapeHtml(first.alt_text)}" /></div>${images.length > 1 ? `<div class="gallery-thumbnails" aria-label="Imagens do produto">${images.map((item, index) => `<button class="gallery-thumbnail${index === 0 ? " active" : ""}" type="button" data-gallery-src="${escapeHtml(item.url)}" data-gallery-alt="${escapeHtml(item.alt_text)}" aria-label="Ver imagem ${item.position} de ${escapeHtml(product.name)}"><img src="${escapeHtml(item.url)}" alt="" /></button>`).join("")}</div>` : ""}</div>`;
+}
+
 async function loadSession() {
   try { const session = await api("/auth/me"); state.user = session.user; state.csrf = session.csrf_token; }
   catch { state.user = null; state.csrf = null; }
@@ -81,7 +87,13 @@ async function home() {
 
 async function productPage(slug) {
   const product = await api(`/products/${encodeURIComponent(slug)}`);
-  content.innerHTML = `<section class="section"><a class="text-link" href="/" data-link>← Voltar à loja</a><div class="layout-two" style="margin-top:1rem"><div class="product-detail-image">${image(product)}</div><div class="panel"><span class="category-label">${escapeHtml(product.category.name)}</span><h1 class="detail-title">${escapeHtml(product.name)}</h1><p class="price">${currency(product.price_cents)}</p><p class="detail-description">${escapeHtml(product.description)}</p><form id="add-to-cart" class="stack"><label>Tamanho<select name="variant_id">${product.variants.map(v => `<option value="${v.id}" ${v.stock ? "" : "disabled"}>${escapeHtml(v.size)} — ${v.stock ? `${v.stock} em estoque` : "esgotado"}</option>`).join("")}</select></label><label>Quantidade<input name="quantity" type="number" min="1" max="10" value="1" /></label><button class="button" type="submit">Adicionar ao carrinho</button></form></div></div></section>`;
+  content.innerHTML = `<section class="section"><a class="text-link" href="/" data-link>← Voltar à loja</a><div class="layout-two" style="margin-top:1rem">${productGallery(product)}<div class="panel"><span class="category-label">${escapeHtml(product.category.name)}</span><h1 class="detail-title">${escapeHtml(product.name)}</h1><p class="price">${currency(product.price_cents)}</p><p class="detail-description">${escapeHtml(product.description)}</p><form id="add-to-cart" class="stack"><label>Tamanho<select name="variant_id">${product.variants.map(v => `<option value="${v.id}" ${v.stock ? "" : "disabled"}>${escapeHtml(v.size)} — ${v.stock ? `${v.stock} em estoque` : "esgotado"}</option>`).join("")}</select></label><label>Quantidade<input name="quantity" type="number" min="1" max="10" value="1" /></label><button class="button" type="submit">Adicionar ao carrinho</button></form></div></div></section>`;
+  content.querySelectorAll("[data-gallery-src]").forEach((button) => button.addEventListener("click", () => {
+    const main = content.querySelector("#gallery-main");
+    main.src = button.dataset.gallerySrc;
+    main.alt = button.dataset.galleryAlt;
+    content.querySelectorAll(".gallery-thumbnail").forEach((thumbnail) => thumbnail.classList.toggle("active", thumbnail === button));
+  }));
   content.querySelector("#add-to-cart").addEventListener("submit", async (event) => { event.preventDefault(); if (!state.user) return navigate("/conta"); const form = new FormData(event.currentTarget); try { state.cart = await api("/cart/items", { method: "POST", body: JSON.stringify({ variant_id: Number(form.get("variant_id")), quantity: Number(form.get("quantity")) }) }); updateHeader(); notify("Produto adicionado ao carrinho."); } catch (error) { notify(error.message); } });
 }
 

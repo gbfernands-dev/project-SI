@@ -52,6 +52,13 @@ class VariantOut(APIModel):
     stock: int
 
 
+class ProductImageOut(APIModel):
+    id: int
+    url: str
+    alt_text: str
+    position: int
+
+
 class ProductOut(APIModel):
     id: int
     category: CategoryOut
@@ -62,6 +69,7 @@ class ProductOut(APIModel):
     image_url: str | None
     is_active: bool
     variants: list[VariantOut]
+    images: list[ProductImageOut]
 
 
 class ProductCreate(BaseModel):
