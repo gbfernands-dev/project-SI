@@ -660,3 +660,30 @@ Seguir TDD para tornar a galeria evidente também na listagem, fixar o fundo das
 
 ### Subagents
 - Não utilizados.
+
+## 2026-10-04 — Início do merge de `develop` para `main`
+
+### Objetivo
+Integrar todo o histórico validado da branch `develop` à branch `main` sem regressões e publicar a atualização no repositório remoto.
+
+### Arquivos potencialmente envolvidos
+- `LOGS_IA.md` para rastreabilidade obrigatória.
+- Histórico Git das branches `develop` e `main`; nenhum arquivo funcional deve receber alteração adicional durante o merge.
+
+### Abordagem
+Atualizar referências remotas; confirmar worktree limpo e relação entre as branches; registrar este início; validar testes, E2E, lint e compilação em `develop`; criar commit do registro; fazer merge explícito e não destrutivo em `main`; repetir as validações relevantes; registrar a conclusão e enviar `main` ao remoto.
+
+### Riscos e limitações
+- `main` ainda está no commit inicial, portanto receberá todo o histórico acumulado de `develop`.
+- O auto-deploy do Render acompanha `develop`; enviar `main` não deve substituir o serviço atual.
+
+### Subagents
+- Não utilizados; o merge e suas validações formam uma sequência curta e dependente.
+
+### Validação pré-merge
+- Relação Git: `origin/main` é ancestral de `develop`; zero commits exclusivos em `main` e 38 commits de vantagem em `develop` antes deste registro.
+- Testes de unidade/API: 31 passaram, com cobertura de 88,57%.
+- E2E Playwright: 3 passaram.
+- `ruff check app tests scripts` — PASS.
+- `compileall` de `app`, `migrations` e `scripts` — PASS.
+- Primeira tentativa de staging, combinada após `git diff --check`, falhou com `permission denied` no `.git/index.lock`; não houve alteração de histórico e o comando foi repetido isoladamente com a permissão adequada.
