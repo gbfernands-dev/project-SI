@@ -636,3 +636,27 @@ Seguir TDD para tornar a galeria evidente também na listagem, fixar o fundo das
 
 ### Subagents
 - Não utilizados; não houve uma subdivisão independente que justificasse o custo de coordenação.
+
+## 2026-10-04 — Publicação e validação externa da galeria, administradores e checkout sandbox
+
+### Resultado
+- Commit funcional `8780a84` enviado à branch `develop` e deploy Render `dep-db0opr9h83ns73cv9p1g` concluído como `live` para o mesmo SHA.
+- As variáveis privadas foram atualizadas por merge no Render, preservando as configurações existentes; nenhuma credencial foi gravada no repositório.
+- O bootstrap da versão publicada promoveu as duas contas solicitadas a administradoras e atualizou suas senhas a partir do ambiente privado.
+- A integração criou com sucesso uma preferência do Mercado Pago para o produto de R$ 0,50 e retornou a URL do sandbox.
+
+### Validação externa
+- Página inicial — HTTP 200, CSS e JavaScript com versão `20261003-2`.
+- Catálogo — 13 produtos ativos; produto `Testar pagamento real` por 50 centavos; 12 produtos com múltiplas imagens.
+- Supabase — as duas contas solicitadas possuem papel `ADMIN`.
+- Login HTTPS — as duas contas autenticaram com sucesso e a API retornou papel `admin`.
+- Checkout — pedido de validação `#6` criado com total de 50 centavos, status `AWAITING_PAYMENT`/`PENDING` e URL em `sandbox.mercadopago.com`.
+- Verificação do Git — nenhum padrão de Access Token ou usuário de teste do Mercado Pago foi encontrado em arquivos rastreados; branch limpa e sincronizada antes deste registro.
+
+### Limitações
+- Nenhum pagamento sandbox foi concluído no checkout externo; portanto, o pedido de validação permanece intencionalmente pendente.
+- O segredo de assinatura de webhook já existente no Render não pode ser comparado com o segredo da aplicação informado no painel do Mercado Pago, pois esse valor não foi fornecido e o Render não expõe segredos gravados. A criação da preferência está validada, mas a confirmação automática de um pagamento aprovado ainda depende dessa correspondência.
+- A atualização de variáveis iniciou um deploy do SHA anterior antes do deploy do commit funcional; ambos terminaram com sucesso e o último deploy ativo é o do commit `8780a84`.
+
+### Subagents
+- Não utilizados.
