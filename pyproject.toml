@@ -1,0 +1,12 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --cov=app --cov-report=term-missing --cov-fail-under=80"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "UP"]
+ignore = ["E501"]
