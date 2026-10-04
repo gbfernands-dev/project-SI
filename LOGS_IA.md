@@ -687,3 +687,27 @@ Atualizar referências remotas; confirmar worktree limpo e relação entre as br
 - `ruff check app tests scripts` — PASS.
 - `compileall` de `app`, `migrations` e `scripts` — PASS.
 - Primeira tentativa de staging, combinada após `git diff --check`, falhou com `permission denied` no `.git/index.lock`; não houve alteração de histórico e o comando foi repetido isoladamente com a permissão adequada.
+
+## 2026-10-04 — Conclusão do merge de `develop` para `main`
+
+### Resultado
+- Merge explícito criado com sucesso pelo algoritmo `ort`, sem conflitos e sem alterações manuais no código.
+- Commit de merge: `d515041` (`merge: integra develop na main`).
+- Todo o histórico validado de `develop` foi incorporado à `main`.
+
+### Arquivos alterados
+- `LOGS_IA.md` recebeu somente este registro de conclusão após o merge.
+- Os demais 130 arquivos chegaram à `main` exclusivamente pelo histórico já validado de `develop`.
+
+### Testes e validações pós-merge
+- Testes de unidade/API: 31 passaram, com cobertura de 88,57%.
+- E2E Playwright: 3 passaram.
+- `ruff check app tests scripts` — PASS.
+- `compileall` de `app`, `migrations` e `scripts` — PASS.
+- Worktree sem conflitos; antes deste registro, `main` estava 40 commits à frente de `origin/main` e zero atrás.
+
+### Limitações
+- O Render permanece configurado para auto-deploy da branch `develop`; este merge atualiza o código-fonte principal no GitHub, mas não troca a branch do serviço publicado.
+
+### Subagents
+- Não utilizados.
