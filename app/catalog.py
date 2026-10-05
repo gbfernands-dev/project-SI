@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.models import Category, Product, ProductImage, ProductVariant
 
 
@@ -43,7 +44,11 @@ CATALOG = (
 
 def image_files(directory: str) -> list[Path]:
     product_directory = CATALOG_ROOT / directory
-    return sorted(path for path in product_directory.iterdir() if path.suffix.lower() in {".png", ".webp"})
+    return sorted(
+        path
+        for path in product_directory.iterdir()
+        if path.suffix.lower() in {".png", ".webp"} and "guia-de-" not in path.stem.lower()
+    )
 
 
 def image_url(path: Path) -> str:
@@ -51,6 +56,7 @@ def image_url(path: Path) -> str:
 
 
 def synchronize_catalog(db: Session) -> None:
+    hide_payment_test = get_settings().mp_environment == "production"
     for legacy in db.query(Product).filter(Product.slug.in_(LEGACY_DEMO_SLUGS)).all():
         legacy.is_active = False
 
@@ -66,14 +72,18 @@ def synchronize_catalog(db: Session) -> None:
         categories[item.category_slug] = category
 
         product = db.query(Product).filter_by(slug=item.slug).first()
+        is_new = product is None
         if product is None:
             product = Product(slug=item.slug, variants=[])
             db.add(product)
-        product.category = category
-        product.name = item.name
-        product.description = item.description
-        product.price_cents = item.price_cents
-        product.is_active = True
+        if is_new:
+            product.category = category
+            product.name = item.name
+            product.description = item.description
+            product.price_cents = item.price_cents
+            product.is_active = True
+        if item.slug == "testar-pagamento-real" and hide_payment_test:
+            product.is_active = False
 
         existing_sizes = {variant.size for variant in product.variants}
         initial_stock = 10 if len(item.sizes) > 1 else 20
@@ -94,10 +104,9 @@ def synchronize_catalog(db: Session) -> None:
             if files
             else [ProductImage(url="/assets/logo", alt_text=item.name, position=1)]
         )
-        product.image_url = desired_images[0].url
-        current = [(image.url, image.alt_text, image.position) for image in product.images]
-        desired = [(image.url, image.alt_text, image.position) for image in desired_images]
-        if current != desired:
+        contains_guide = any("guia-de-" in image.url.lower() for image in product.images)
+        if is_new or contains_guide:
+            product.image_url = desired_images[0].url
             product.images.clear()
             db.flush()
             product.images.extend(desired_images)

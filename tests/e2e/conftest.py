@@ -25,6 +25,10 @@ def live_server():
     environment = os.environ.copy()
     database_path = Path(f"e2e_godzilla_{uuid4().hex}.db")
     environment["DATABASE_URL"] = f"sqlite+pysqlite:///./{database_path.name}"
+    environment["ADMIN_EMAIL"] = "admin@admin.com"
+    environment["ADMIN_PASSWORD"] = "site-password-123"
+    environment["ATHLETICS_ADMIN_EMAIL"] = "atletica@atletica.com"
+    environment["ATHLETICS_ADMIN_PASSWORD"] = "athletics-password-123"
     subprocess.run(
         [sys.executable, "-m", "alembic", "upgrade", "head"],
         check=True,

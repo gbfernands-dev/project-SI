@@ -17,6 +17,9 @@ def production_environment(**overrides):
         "DATABASE_URL": "postgresql://postgres:password@db.example.supabase.co:5432/postgres",
         "PUBLIC_BASE_URL": "https://loja.example.onrender.com",
         "MP_ACCESS_TOKEN": "TEST-token",
+        "MP_PUBLIC_KEY": "TEST-public-key",
+        "MP_CLIENT_ID": "123456789",
+        "MP_CLIENT_SECRET": "client-secret",
         "MP_WEBHOOK_SECRET": "webhook-secret",
         "MP_ENVIRONMENT": "test",
         "SUPABASE_URL": "https://project.supabase.co",
@@ -42,6 +45,9 @@ def test_production_settings_normalize_postgresql_driver_and_ssl():
         ({"DATABASE_URL": "sqlite:///./invalid.db"}, "PostgreSQL"),
         ({"PUBLIC_BASE_URL": "http://localhost:8000"}, "HTTPS"),
         ({"MP_ACCESS_TOKEN": ""}, "MP_ACCESS_TOKEN"),
+        ({"MP_PUBLIC_KEY": ""}, "MP_PUBLIC_KEY"),
+        ({"MP_CLIENT_ID": ""}, "MP_CLIENT_ID"),
+        ({"MP_CLIENT_SECRET": ""}, "MP_CLIENT_SECRET"),
         ({"MP_ENVIRONMENT": "invalid"}, "MP_ENVIRONMENT"),
         ({"SUPABASE_SERVICE_KEY": ""}, "SUPABASE_SERVICE_KEY"),
     ],
@@ -61,10 +67,13 @@ def test_render_runs_migrations_and_declares_external_configuration():
     assert service["startCommand"].startswith("alembic upgrade head && python -m app.bootstrap &&")
     assert variables["APP_ENV"]["value"] == "production"
     assert variables["PYTHON_VERSION"]["value"] == "3.12.15"
-    assert variables["MP_ENVIRONMENT"]["value"] == "test"
+    assert variables["MP_ENVIRONMENT"]["value"] == "production"
     for name in (
         "DATABASE_URL",
         "MP_ACCESS_TOKEN",
+        "MP_PUBLIC_KEY",
+        "MP_CLIENT_ID",
+        "MP_CLIENT_SECRET",
         "MP_WEBHOOK_SECRET",
         "SUPABASE_URL",
         "SUPABASE_SERVICE_KEY",
@@ -142,3 +151,33 @@ def test_frontend_assets_are_versioned_and_product_cards_expose_gallery():
     assert '/static/js/app.js?v=' in index
     assert 'class="card-gallery-thumbnails"' in script
     assert "background: var(--product-image-background)" in stylesheet
+    assert 'data-admin-action="edit"' in script
+    assert 'data-admin-action="delete"' in script
+    assert "Saúde e configurações" in script
+    assert "Contas criadas" in script
+    assert "border-radius: 50%" in stylesheet
+    assert "@media (prefers-reduced-motion: reduce)" in stylesheet
+    assert "@media (max-width: 1024px)" in stylesheet
+    assert "@media (max-width: 640px)" in stylesheet
+
+
+def test_mercado_pago_secrets_are_only_declared_as_environment_variables():
+    tracked_configuration = "\n".join(
+        Path(path).read_text(encoding="utf-8")
+        for path in (".env.example", "render.yaml", "README.md", "app/config.py")
+    )
+
+    assert "APP_USR-" not in tracked_configuration
+    for variable in ("MP_PUBLIC_KEY", "MP_ACCESS_TOKEN", "MP_CLIENT_ID", "MP_CLIENT_SECRET"):
+        assert variable in tracked_configuration
+
+
+def test_admin_scope_migration_is_explicit_and_reversible():
+    migration = Path("migrations/versions/20261005_0003_admin_observability.py").read_text(encoding="utf-8")
+
+    assert 'batch_alter_table("users")' in migration
+    assert "batch_op.add_column" in migration
+    assert "admin_scope" in migration
+    assert "registration_ip" in migration
+    assert "last_login_ip" in migration
+    assert "op.drop_column" in migration

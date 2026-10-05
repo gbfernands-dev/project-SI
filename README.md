@@ -1,15 +1,15 @@
 # Loja da Atlética Godzilla
 
 Protótipo acadêmico de e-commerce da Atlética Godzilla UGB. O objetivo é
-demonstrar a jornada completa do cliente por uma URL HTTPS gratuita, sem receber
-pagamentos reais. A aplicação é um monólito FastAPI que entrega o front-end em
+oferecer a jornada completa do cliente por uma URL HTTPS. A aplicação é um
+monólito FastAPI que entrega o front-end em
 HTML/CSS/JavaScript e a API versionada sob `/api/v1`.
 
 ## Tecnologias
 
 - Python 3.12, FastAPI, SQLAlchemy e Alembic.
 - PostgreSQL no Supabase para homologação acadêmica e PostgreSQL Docker no desenvolvimento.
-- Mercado Pago Checkout Pro exclusivamente com credenciais e usuários de teste.
+- Mercado Pago Checkout Pro, com ambiente definido exclusivamente por configuração privada do servidor.
 - Tokens visuais em `promptcss.json`, carregados pelo navegador.
 - TDD com Pytest/Playwright, contratos OpenAPI e CI no GitHub Actions.
 
@@ -35,10 +35,10 @@ docker compose exec web playwright install --with-deps chromium
 docker compose exec web pytest --no-cov tests/e2e
 ```
 
-## Homologação acadêmica
+## Ambiente público
 
 O ambiente público usa Render Free, PostgreSQL/Storage do Supabase Free e
-Mercado Pago em sandbox. O Blueprint versionado em `render.yaml` fixa Python
+Mercado Pago em produção. O Blueprint versionado em `render.yaml` fixa Python
 3.12, executa as migrações e o bootstrap administrativo antes de iniciar o
 FastAPI, publica somente a branch `main` e aguarda os checks da CI.
 
@@ -48,19 +48,22 @@ Para criar o serviço:
 2. Crie o bucket público `products` no Supabase.
 3. Abra o [Blueprint no Render](https://dashboard.render.com/blueprint/new?repo=https://github.com/gbfernands-dev/project-SI) e autorize somente este repositório.
 4. Preencha no Dashboard os valores marcados como `sync: false`: `DATABASE_URL`,
-   `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, `SUPABASE_URL`,
+   `MP_PUBLIC_KEY`, `MP_ACCESS_TOKEN`, `MP_CLIENT_ID`, `MP_CLIENT_SECRET`, `MP_WEBHOOK_SECRET`, `SUPABASE_URL`,
    `SUPABASE_SERVICE_KEY`, `ADMIN_EMAIL` e `ADMIN_PASSWORD`.
 5. Aplique o Blueprint e valide `https://SEU-DOMINIO/api/v1/health`.
 
-Use a URL PostgreSQL do pooler do Supabase em `DATABASE_URL`, credenciais de
-teste do Mercado Pago e a chave `service_role` do Supabase somente no backend.
+Use a URL PostgreSQL do pooler do Supabase em `DATABASE_URL` e mantenha Access
+Token, Client Secret e a chave `service_role` do Supabase somente no backend.
+O Checkout Pro envia o Access Token no cabeçalho `Authorization`; Client ID e
+Client Secret ficam reservados para fluxos OAuth e nunca são enviados ao navegador.
 O Render fornece `RENDER_EXTERNAL_URL`, usado automaticamente como URL pública;
 defina `PUBLIC_BASE_URL` manualmente apenas se adotar um domínio próprio.
 
 O webhook é `https://SEU-DOMINIO/api/v1/payments/webhook`. O servidor valida a
-assinatura e consulta o pagamento antes de alterar o pedido. Cold start e pausa por
-inatividade são limitações aceitas para a apresentação; este ambiente não deve
-ser usado para uma operação comercial.
+assinatura, consulta o pagamento e confere valor, moeda e ambiente antes de alterar
+o pedido. Em produção, o produto interno de validação de R$ 0,50 é ocultado
+automaticamente. Cold start e pausa por inatividade continuam sendo limitações
+operacionais do plano gratuito.
 
 ## Branches e qualidade
 

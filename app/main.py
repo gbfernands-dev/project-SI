@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
+from decimal import Decimal, InvalidOperation
 import mimetypes
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile, status
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -23,12 +24,14 @@ from app.models import (
     PaymentStatus,
     Product,
     ProductVariant,
-    Role,
     Session as UserSession,
     User,
+    now_utc,
 )
 from app.schemas import (
     AdminOrderOut,
+    AdminOverviewOut,
+    AdminUserOut,
     CartItemCreate,
     CartOut,
     CategoryCreate,
@@ -50,10 +53,14 @@ from app.schemas import (
 from app.security import (
     SESSION_COOKIE,
     create_session,
+    get_catalog_admin,
     get_current_session,
     get_current_user,
+    get_site_admin,
     hash_password,
-    require_admin,
+    is_site_admin,
+    require_catalog_admin,
+    require_site_admin,
     require_user,
     verify_csrf,
     verify_password,
@@ -130,6 +137,20 @@ def order_out(order: Order) -> OrderOut:
     return OrderOut.model_validate(order)
 
 
+def request_ip(request: Request) -> str | None:
+    if not request.client or not request.client.host:
+        return None
+    return request.client.host[:45]
+
+
+def request_location(request: Request) -> str | None:
+    city = request.headers.get("cf-ipcity") or request.headers.get("x-vercel-ip-city")
+    region = request.headers.get("cf-region") or request.headers.get("x-vercel-ip-country-region")
+    country = request.headers.get("cf-ipcountry") or request.headers.get("x-vercel-ip-country")
+    parts = [part.strip().replace("\n", " ").replace("\r", " ")[:80] for part in (city, region, country) if part]
+    return ", ".join(parts)[:160] or None
+
+
 @app.get("/api/v1/health", response_model=Message, tags=["system"])
 def health() -> Message:
     return Message(message="ok")
@@ -146,8 +167,14 @@ def design_tokens() -> FileResponse:
 
 
 @app.post("/api/v1/auth/register", response_model=SessionOut, status_code=status.HTTP_201_CREATED, tags=["auth"])
-def register(payload: UserRegister, response: Response, db: Session = Depends(get_db)) -> SessionOut:
-    user = User(name=payload.name.strip(), email=str(payload.email).lower(), password_hash=hash_password(payload.password))
+def register(payload: UserRegister, response: Response, request: Request, db: Session = Depends(get_db)) -> SessionOut:
+    user = User(
+        name=payload.name.strip(),
+        email=str(payload.email).lower(),
+        password_hash=hash_password(payload.password),
+        registration_ip=request_ip(request),
+        registration_location=request_location(request),
+    )
     db.add(user)
     try:
         db.commit()
@@ -161,10 +188,14 @@ def register(payload: UserRegister, response: Response, db: Session = Depends(ge
 
 
 @app.post("/api/v1/auth/login", response_model=SessionOut, tags=["auth"])
-def login(payload: UserLogin, response: Response, db: Session = Depends(get_db)) -> SessionOut:
+def login(payload: UserLogin, response: Response, request: Request, db: Session = Depends(get_db)) -> SessionOut:
     user = db.query(User).filter(User.email == str(payload.email).lower()).first()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="E-mail ou senha inválidos.")
+    user.last_login_ip = request_ip(request)
+    user.last_login_location = request_location(request)
+    user.last_login_at = now_utc()
+    db.commit()
     token, session = create_session(db, user)
     response.set_cookie(SESSION_COOKIE, token, httponly=True, samesite="lax", secure=settings.is_production, max_age=7 * 86400)
     return SessionOut(user=UserOut.model_validate(user), csrf_token=session.csrf_token)
@@ -298,7 +329,7 @@ def my_orders(user: User = Depends(get_current_user), db: Session = Depends(get_
 @app.get("/api/v1/orders/{order_id}", response_model=OrderOut, tags=["orders"])
 def get_order(order_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> OrderOut:
     order = db.query(Order).options(joinedload(Order.items)).filter(Order.id == order_id).first()
-    if not order or (order.user_id != user.id and user.role != Role.ADMIN):
+    if not order or (order.user_id != user.id and not is_site_admin(user)):
         raise HTTPException(status_code=404, detail="Pedido não encontrado.")
     return order_out(order)
 
@@ -319,6 +350,19 @@ def approve_order_payment(db: Session, order: Order, payment_id: str) -> None:
     order.payment_id = payment_id
 
 
+def payment_matches_order(payment: dict, order: Order) -> bool:
+    try:
+        paid_cents = Decimal(str(payment.get("transaction_amount"))) * 100
+    except (InvalidOperation, TypeError, ValueError):
+        return False
+    expected_live_mode = settings.mp_environment == "production"
+    return (
+        paid_cents == Decimal(order.total_cents)
+        and payment.get("currency_id") == "BRL"
+        and payment.get("live_mode") is expected_live_mode
+    )
+
+
 @app.post("/api/v1/payments/mock/orders/{order_id}/approve", response_model=OrderOut, tags=["payments"])
 def mock_approve_payment(order_id: int, user: User = Depends(require_user), db: Session = Depends(get_db)) -> OrderOut:
     if settings.is_production or settings.mp_access_token:
@@ -332,37 +376,38 @@ def mock_approve_payment(order_id: int, user: User = Depends(require_user), db: 
     return order_out(order)
 
 
-@app.post("/api/v1/payments/webhook", status_code=status.HTTP_204_NO_CONTENT, tags=["payments"])
+@app.post("/api/v1/payments/webhook", status_code=status.HTTP_200_OK, tags=["payments"])
 async def mercado_pago_webhook(request: Request, db: Session = Depends(get_db)) -> Response:
     payload = await request.json()
     signature = request.headers.get("x-signature")
     request_id = request.headers.get("x-request-id")
-    if not verify_mercado_pago_signature(payload, signature, request_id):
+    payment_id = request.query_params.get("data.id") or str(payload.get("data", {}).get("id", ""))
+    if not verify_mercado_pago_signature(payment_id, signature, request_id):
         raise HTTPException(status_code=401, detail="Assinatura de webhook inválida.")
-    payment_id = str(payload.get("data", {}).get("id", ""))
     if not payment_id or db.query(PaymentEvent).filter(PaymentEvent.payment_id == payment_id).first():
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return Response(status_code=status.HTTP_200_OK)
     payment = get_mercado_pago_payment(payment_id)
     db.add(PaymentEvent(payment_id=payment_id, payload=compact_json(payment)))
     order_id = payment.get("external_reference")
     if payment.get("status") == "approved" and order_id:
-        order = db.query(Order).options(joinedload(Order.items)).filter(Order.id == int(order_id)).first()
-        if order:
+        try:
+            normalized_order_id = int(order_id)
+        except (TypeError, ValueError):
+            normalized_order_id = None
+        order = db.query(Order).options(joinedload(Order.items)).filter(Order.id == normalized_order_id).first()
+        if order and payment_matches_order(payment, order):
             approve_order_payment(db, order, payment_id)
     db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_200_OK)
 
 
 @app.get("/api/v1/admin/products", response_model=list[ProductOut], tags=["admin"])
-def admin_products(_: User = Depends(get_current_user), db: Session = Depends(get_db)) -> list[Product]:
-    # Authorization is checked explicitly to keep GET requests CSRF-free.
-    if _.role != Role.ADMIN:
-        raise HTTPException(status_code=403, detail="Acesso administrativo necessário.")
+def admin_products(_: User = Depends(get_catalog_admin), db: Session = Depends(get_db)) -> list[Product]:
     return product_query(db).order_by(Product.name).all()
 
 
 @app.post("/api/v1/admin/categories", response_model=CategoryOut, status_code=201, tags=["admin"])
-def create_category(payload: CategoryCreate, _: User = Depends(require_admin), db: Session = Depends(get_db)) -> Category:
+def create_category(payload: CategoryCreate, _: User = Depends(require_catalog_admin), db: Session = Depends(get_db)) -> Category:
     category = Category(name=payload.name.strip(), slug=payload.slug)
     db.add(category)
     try:
@@ -375,7 +420,7 @@ def create_category(payload: CategoryCreate, _: User = Depends(require_admin), d
 
 
 @app.post("/api/v1/admin/products", response_model=ProductOut, status_code=201, tags=["admin"])
-def create_product(payload: ProductCreate, _: User = Depends(require_admin), db: Session = Depends(get_db)) -> Product:
+def create_product(payload: ProductCreate, _: User = Depends(require_catalog_admin), db: Session = Depends(get_db)) -> Product:
     if not db.get(Category, payload.category_id):
         raise HTTPException(status_code=404, detail="Categoria não encontrada.")
     product = Product(**payload.model_dump())
@@ -389,7 +434,7 @@ def create_product(payload: ProductCreate, _: User = Depends(require_admin), db:
 
 
 @app.patch("/api/v1/admin/products/{product_id}", response_model=ProductOut, tags=["admin"])
-def update_product(product_id: int, payload: ProductUpdate, _: User = Depends(require_admin), db: Session = Depends(get_db)) -> Product:
+def update_product(product_id: int, payload: ProductUpdate, _: User = Depends(require_catalog_admin), db: Session = Depends(get_db)) -> Product:
     product = get_product_or_404(db, product_id)
     values = payload.model_dump(exclude_unset=True)
     if "category_id" in values and not db.get(Category, values["category_id"]):
@@ -404,8 +449,23 @@ def update_product(product_id: int, payload: ProductUpdate, _: User = Depends(re
         raise HTTPException(status_code=409, detail="Slug já utilizado.")
 
 
+@app.delete("/api/v1/admin/products/{product_id}", response_model=Message, tags=["admin"])
+def delete_product(
+    product_id: int,
+    _: User = Depends(require_catalog_admin),
+    db: Session = Depends(get_db),
+) -> Message:
+    product = get_product_or_404(db, product_id)
+    variant_ids = [variant.id for variant in product.variants]
+    if variant_ids:
+        db.query(CartItem).filter(CartItem.variant_id.in_(variant_ids)).delete(synchronize_session=False)
+    product.is_active = False
+    db.commit()
+    return Message(message="Produto excluído do catálogo.")
+
+
 @app.post("/api/v1/admin/products/{product_id}/variants", response_model=VariantOut, status_code=201, tags=["admin"])
-def create_variant(product_id: int, payload: VariantCreate, _: User = Depends(require_admin), db: Session = Depends(get_db)) -> ProductVariant:
+def create_variant(product_id: int, payload: VariantCreate, _: User = Depends(require_catalog_admin), db: Session = Depends(get_db)) -> ProductVariant:
     get_product_or_404(db, product_id)
     variant = ProductVariant(product_id=product_id, **payload.model_dump())
     db.add(variant)
@@ -419,7 +479,7 @@ def create_variant(product_id: int, payload: VariantCreate, _: User = Depends(re
 
 
 @app.patch("/api/v1/admin/variants/{variant_id}", response_model=VariantOut, tags=["admin"])
-def update_variant(variant_id: int, payload: VariantCreate, _: User = Depends(require_admin), db: Session = Depends(get_db)) -> ProductVariant:
+def update_variant(variant_id: int, payload: VariantCreate, _: User = Depends(require_catalog_admin), db: Session = Depends(get_db)) -> ProductVariant:
     variant = db.get(ProductVariant, variant_id)
     if not variant:
         raise HTTPException(status_code=404, detail="Variação não encontrada.")
@@ -434,7 +494,7 @@ def update_variant(variant_id: int, payload: VariantCreate, _: User = Depends(re
 
 
 @app.post("/api/v1/admin/products/{product_id}/image", response_model=ProductOut, tags=["admin"])
-async def upload_image(product_id: int, file: UploadFile = File(...), _: User = Depends(require_admin), db: Session = Depends(get_db)) -> Product:
+async def upload_image(product_id: int, file: UploadFile = File(...), _: User = Depends(require_catalog_admin), db: Session = Depends(get_db)) -> Product:
     product = get_product_or_404(db, product_id)
     product.image_url = await save_product_image(file)
     db.commit()
@@ -442,14 +502,12 @@ async def upload_image(product_id: int, file: UploadFile = File(...), _: User = 
 
 
 @app.get("/api/v1/admin/orders", response_model=list[AdminOrderOut], tags=["admin"])
-def admin_orders(_: User = Depends(get_current_user), db: Session = Depends(get_db)) -> list[Order]:
-    if _.role != Role.ADMIN:
-        raise HTTPException(status_code=403, detail="Acesso administrativo necessário.")
+def admin_orders(_: User = Depends(get_site_admin), db: Session = Depends(get_db)) -> list[Order]:
     return db.query(Order).options(joinedload(Order.items), joinedload(Order.user)).order_by(Order.created_at.desc()).all()
 
 
 @app.patch("/api/v1/admin/orders/{order_id}/status", response_model=OrderOut, tags=["admin"])
-def update_order_status(order_id: int, payload: OrderStatusUpdate, _: User = Depends(require_admin), db: Session = Depends(get_db)) -> OrderOut:
+def update_order_status(order_id: int, payload: OrderStatusUpdate, _: User = Depends(require_site_admin), db: Session = Depends(get_db)) -> OrderOut:
     order = db.query(Order).options(joinedload(Order.items)).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Pedido não encontrado.")
@@ -460,6 +518,39 @@ def update_order_status(order_id: int, payload: OrderStatusUpdate, _: User = Dep
     db.commit()
     db.refresh(order)
     return order_out(order)
+
+
+@app.get("/api/v1/admin/users", response_model=list[AdminUserOut], tags=["admin"])
+def admin_users(_: User = Depends(get_site_admin), db: Session = Depends(get_db)) -> list[User]:
+    return db.query(User).order_by(User.created_at.desc(), User.id.desc()).limit(250).all()
+
+
+@app.get("/api/v1/admin/overview", response_model=AdminOverviewOut, tags=["admin"])
+def admin_overview(_: User = Depends(get_site_admin), db: Session = Depends(get_db)) -> AdminOverviewOut:
+    db.execute(text("SELECT 1"))
+    return AdminOverviewOut(
+        counts={
+            "users": db.query(User).count(),
+            "active_products": db.query(Product).filter(Product.is_active.is_(True)).count(),
+            "orders": db.query(Order).count(),
+            "active_sessions": db.query(UserSession).filter(UserSession.expires_at > now_utc()).count(),
+        },
+        health={"api": "ok", "database": "ok"},
+        integrations={
+            "mercado_pago": {
+                "environment": settings.mp_environment,
+                "public_key_configured": bool(settings.mp_public_key),
+                "access_token_configured": bool(settings.mp_access_token),
+                "client_id_configured": bool(settings.mp_client_id),
+                "client_secret_configured": bool(settings.mp_client_secret),
+                "webhook_secret_configured": bool(settings.mp_webhook_secret),
+            },
+            "supabase": {
+                "url_configured": bool(settings.supabase_url),
+                "storage_key_configured": bool(settings.supabase_service_key),
+            },
+        },
+    )
 
 
 @app.get("/", include_in_schema=False)

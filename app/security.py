@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Role, Session as UserSession, User, now_utc
+from app.models import AdminScope, Role, Session as UserSession, User, now_utc
 
 
 PASSWORDS = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -79,7 +79,36 @@ def require_user(
     return user
 
 
-def require_admin(user: User = Depends(require_user)) -> User:
-    if user.role != Role.ADMIN:
+def is_catalog_admin(user: User) -> bool:
+    return user.role == Role.ADMIN and user.admin_scope in {AdminScope.SITE, AdminScope.ATHLETICS}
+
+
+def is_site_admin(user: User) -> bool:
+    return user.role == Role.ADMIN and user.admin_scope == AdminScope.SITE
+
+
+def get_catalog_admin(user: User = Depends(get_current_user)) -> User:
+    if not is_catalog_admin(user):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso administrativo necessário.")
     return user
+
+
+def get_site_admin(user: User = Depends(get_current_user)) -> User:
+    if not is_site_admin(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso do administrador do site necessário.")
+    return user
+
+
+def require_catalog_admin(user: User = Depends(require_user)) -> User:
+    if not is_catalog_admin(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso administrativo necessário.")
+    return user
+
+
+def require_site_admin(user: User = Depends(require_user)) -> User:
+    if not is_site_admin(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso do administrador do site necessário.")
+    return user
+
+
+require_admin = require_site_admin

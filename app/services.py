@@ -51,7 +51,7 @@ def get_mercado_pago_payment(payment_id: str) -> dict:
     return response.json()
 
 
-def verify_mercado_pago_signature(payload: dict, signature: str | None, request_id: str | None) -> bool:
+def verify_mercado_pago_signature(data_id: str, signature: str | None, request_id: str | None) -> bool:
     secret = get_settings().mp_webhook_secret
     if not secret:
         return not get_settings().is_production
@@ -59,7 +59,6 @@ def verify_mercado_pago_signature(payload: dict, signature: str | None, request_
         return False
     parts = dict(item.split("=", 1) for item in signature.split(",") if "=" in item)
     timestamp, received = parts.get("ts"), parts.get("v1")
-    data_id = str(payload.get("data", {}).get("id", ""))
     if not timestamp or not received or not data_id:
         return False
     manifest = f"id:{data_id};request-id:{request_id or ''};ts:{timestamp};"

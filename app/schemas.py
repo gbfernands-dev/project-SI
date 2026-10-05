@@ -28,6 +28,16 @@ class UserOut(APIModel):
     name: str
     email: EmailStr
     role: str
+    admin_scope: str | None
+
+
+class AdminUserOut(UserOut):
+    created_at: datetime
+    registration_ip: str | None
+    registration_location: str | None
+    last_login_ip: str | None
+    last_login_location: str | None
+    last_login_at: datetime | None
 
 
 class SessionOut(BaseModel):
@@ -147,3 +157,9 @@ class CheckoutOut(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: Literal["available", "picked_up"]
+
+
+class AdminOverviewOut(BaseModel):
+    counts: dict[str, int]
+    health: dict[str, str]
+    integrations: dict[str, dict[str, bool | str]]

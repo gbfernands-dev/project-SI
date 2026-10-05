@@ -1,4 +1,8 @@
 from pathlib import Path
+from types import SimpleNamespace
+
+from app.catalog import synchronize_catalog
+from app.database import SessionLocal
 
 
 DIVERGENT_MODEL_PHOTOS = (
@@ -37,8 +41,8 @@ def test_storefront_exposes_complete_catalog_with_ordered_gallery(client):
     assert official_shirt["price_cents"] == 8990
     assert [variant["size"] for variant in official_shirt["variants"]] == ["P", "M", "G", "GG"]
     assert official_shirt["image_url"] == official_shirt["images"][0]["url"]
-    assert [image["position"] for image in official_shirt["images"]] == [1, 2, 3]
-    assert any("guia-de-tamanhos" in image["url"] for image in official_shirt["images"])
+    assert [image["position"] for image in official_shirt["images"]] == [1, 2]
+    assert all("guia-de-" not in image["url"] for image in official_shirt["images"])
 
     payment_test = next(product for product in products if product["slug"] == "testar-pagamento-real")
     assert payment_test["name"] == "Testar pagamento real"
@@ -47,13 +51,25 @@ def test_storefront_exposes_complete_catalog_with_ordered_gallery(client):
     assert [variant["size"] for variant in payment_test["variants"]] == ["Único"]
 
 
-def test_catalog_assets_are_served_and_keep_the_approved_guides(client):
+def test_catalog_assets_are_served_without_size_guides(client):
     products = client.get("/api/v1/products").json()
     images = [image for product in products for image in product["images"]]
     guide_images = [image for image in images if "guia-de-" in image["url"]]
 
-    assert len(guide_images) == 10
+    assert guide_images == []
     for image in images:
         response = client.get(image["url"])
         assert response.status_code == 200, image["url"]
         assert response.headers["content-type"] in {"image/png", "image/webp"}
+
+
+def test_production_catalog_hides_the_payment_validation_product(client, monkeypatch):
+    monkeypatch.setattr("app.catalog.get_settings", lambda: SimpleNamespace(mp_environment="production"))
+    db = SessionLocal()
+    try:
+        synchronize_catalog(db)
+    finally:
+        db.close()
+
+    slugs = {product["slug"] for product in client.get("/api/v1/products").json()}
+    assert "testar-pagamento-real" not in slugs

@@ -25,6 +25,10 @@
     },
     "shadows": {
       "floating": "0 20px 50px #0008"
+    },
+    "motion": {
+      "duration": "200ms",
+      "easing": "ease-out"
     }
   },
   "role": "Senior Frontend Designer and UI Engineer",

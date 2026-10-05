@@ -23,6 +23,9 @@ class Settings:
             values.get("RENDER_EXTERNAL_URL", "http://localhost:8000"),
         ).rstrip("/")
         self.mp_access_token = values.get("MP_ACCESS_TOKEN", "")
+        self.mp_public_key = values.get("MP_PUBLIC_KEY", "")
+        self.mp_client_id = values.get("MP_CLIENT_ID", "")
+        self.mp_client_secret = values.get("MP_CLIENT_SECRET", "")
         self.mp_webhook_secret = values.get("MP_WEBHOOK_SECRET", "")
         self.mp_environment = values.get("MP_ENVIRONMENT", "test").lower()
         self.supabase_url = values.get("SUPABASE_URL", "").rstrip("/")
@@ -51,6 +54,9 @@ class Settings:
             raise RuntimeError("PUBLIC_BASE_URL de produção deve usar HTTPS.")
         required = {
             "MP_ACCESS_TOKEN": self.mp_access_token,
+            "MP_PUBLIC_KEY": self.mp_public_key,
+            "MP_CLIENT_ID": self.mp_client_id,
+            "MP_CLIENT_SECRET": self.mp_client_secret,
             "MP_WEBHOOK_SECRET": self.mp_webhook_secret,
             "SUPABASE_URL": self.supabase_url,
             "SUPABASE_SERVICE_KEY": self.supabase_service_key,

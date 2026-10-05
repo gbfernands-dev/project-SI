@@ -16,6 +16,11 @@ class Role(str, Enum):
     ADMIN = "admin"
 
 
+class AdminScope(str, Enum):
+    SITE = "site"
+    ATHLETICS = "athletics"
+
+
 class PaymentStatus(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
@@ -36,7 +41,13 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column(SqlEnum(Role), default=Role.CUSTOMER)
+    admin_scope: Mapped[AdminScope | None] = mapped_column(SqlEnum(AdminScope, native_enum=False, length=20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    registration_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    registration_location: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    last_login_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    last_login_location: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     cart_items: Mapped[list["CartItem"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 

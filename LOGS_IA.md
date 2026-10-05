@@ -711,3 +711,74 @@ Atualizar referências remotas; confirmar worktree limpo e relação entre as br
 
 ### Subagents
 - Não utilizados.
+
+## 2026-10-05 — Início da evolução dos painéis administrativos, pagamentos e responsividade
+
+### Objetivo
+- Disponibilizar um painel completo para `admin@admin.com`, com visão de contas, usuários, informações operacionais e saúde/configuração do site.
+- Disponibilizar um painel simplificado para `atletica@atletica.com`, com edição e exclusão de produtos.
+- Adequar a integração do Mercado Pago às novas credenciais sem versionar segredos.
+- Remover os guias de tamanho do site, retirar a borda visual da logo da página inicial e adicionar animações leves.
+- Melhorar a experiência responsiva em desktop e dispositivos móveis.
+
+### Arquivos potencialmente envolvidos
+- `app/` (autenticação, autorização, administração, catálogo, configuração e pagamentos).
+- `static/index.html`, `static/js/app.js` e `static/css/main.css`.
+- `tests/` e, se necessário, `migrations/`.
+- `promptcss.json`, `.env.example`, documentação de implantação e `LOGS_IA.md`.
+
+### Abordagem
+Mapear a arquitetura e as implementações existentes; avaliar trabalho paralelo; escrever primeiro testes de autorização, operações administrativas, segurança das configurações e interface responsiva; confirmar RED; implementar o mínimo necessário; confirmar GREEN; revisar, validar a suíte, lint, compilação/build e Git; concluir este registro e criar commit focado.
+
+### Riscos e limitações
+- As credenciais de produção fornecidas na conversa são segredos e não podem ser gravadas em arquivos rastreados, logs ou respostas.
+- Coleta de IP e localização exige minimização de dados, transparência e cuidado com LGPD; primeiro será verificado o que o sistema já coleta e o que pode ser exibido com segurança.
+- Operações de exclusão de produtos devem preservar integridade referencial e o comportamento já definido para produtos vinculados a pedidos.
+- A validação de pagamentos reais não incluirá cobrança sem autorização adicional explícita.
+
+### Subagents
+- Em avaliação após o mapeamento inicial, com uso apenas se houver frentes realmente independentes.
+
+## 2026-10-05 — Conclusão da evolução dos painéis administrativos, pagamentos e responsividade
+
+### Resultado
+- Criado controle de acesso por escopo administrativo: `site` para a conta principal e `athletics` para a Atlética.
+- O administrador do site passou a visualizar contagens operacionais, saúde da API/banco, estado redigido das integrações e até 250 contas com datas, último IP e localização aproximada quando informada pelo proxy.
+- O administrador da Atlética recebeu painel simplificado de catálogo, com criação, edição, variações e exclusão lógica de produtos, sem acesso a usuários, diagnóstico ou pedidos.
+- A exclusão preserva pedidos históricos, remove itens de carrinho relacionados e não é desfeita pelo sincronizador em reinícios; edições administrativas também deixaram de ser sobrescritas.
+- Guias de tamanho/medidas foram retirados de todas as galerias públicas sem criar cópias ou arquivos temporários.
+- A logo do hero e do rodapé passou a ser recortada em círculo, sem a borda quadrada; a animação contínua decorativa foi removida e substituída por transições leves compatíveis com `prefers-reduced-motion`.
+- Responsividade revisada nos breakpoints de 1024 px e 640 px, incluindo menu, filtros, carrinho, pedidos, tabelas, formulários e ações administrativas.
+- As quatro variáveis fornecidas pelo Mercado Pago foram declaradas como configuração de servidor; nenhum valor foi versionado. Access Token continua restrito ao cabeçalho do backend, e Client Secret não é enviado ao navegador.
+- Webhook atualizado para validar `data.id` da query e responder HTTP 200 conforme documentação vigente; aprovação agora também confere valor, moeda e ambiente. O produto de validação de R$ 0,50 é ocultado automaticamente em produção.
+- Adicionada migração Alembic para escopo administrativo e metadados mínimos de acesso, com RLS/revogação para `anon` e `authenticated` na tabela `users` em PostgreSQL.
+
+### Arquivos alterados
+- Backend e banco: `app/bootstrap.py`, `app/catalog.py`, `app/config.py`, `app/main.py`, `app/models.py`, `app/schemas.py`, `app/security.py`, `app/services.py` e `migrations/versions/20261005_0003_admin_observability.py`.
+- Front-end e design: `static/index.html`, `static/js/app.js`, `static/css/main.css` e `promptcss.json`.
+- Configuração/documentação: `.env.example`, `render.yaml`, `README.md` e `LOGS_IA.md`.
+- Testes: `tests/test_admin_and_payments.py`, `tests/test_catalog.py`, `tests/test_config_and_deploy.py`, `tests/e2e/conftest.py` e `tests/e2e/test_storefront.py`.
+
+### TDD e validações
+- RED confirmado inicialmente por ausência de `AdminScope`; REDs adicionais confirmados para resposta HTTP do webhook, validação de valor do pagamento e ocultação do produto de teste em produção.
+- Testes de unidade/API: 38 passaram, cobertura total de 89,56%.
+- E2E Playwright/Chromium: 5 passaram, incluindo desktop, viewport móvel de 390 px e os dois painéis administrativos.
+- `ruff check app tests scripts` — PASS.
+- `compileall` de `app`, `migrations` e `scripts` — PASS.
+- `node --check static/js/app.js` — PASS.
+- Migração aplicada com sucesso em SQLite pelo fixture E2E.
+- `git diff --check` — PASS; varredura de padrões de segredos — nenhum valor real encontrado.
+- Um servidor E2E órfão de uma execução interrompida foi encerrado e seu banco temporário foi removido; nenhum novo artefato temporário permaneceu.
+
+### Limitações
+- A localização é apenas aproximada e só existe quando o proxy/CDN envia cabeçalhos geográficos; não há rastreamento por GPS nem consulta a terceiros.
+- A retenção/expurgo automático de IPs ainda não foi implementada; o aviso de privacidade foi atualizado e o acesso foi restrito ao administrador do site.
+- Nenhuma cobrança real foi iniciada durante a validação.
+- A atualização remota no Render não foi executada: o conector encontrou apenas o workspace `My Workspace`, mas exige confirmação explícita do usuário antes de alterar variáveis ou serviços.
+- O segredo de assinatura do webhook não foi fornecido nesta tarefa; antes do go-live deve ser confirmado no painel do Mercado Pago se o segredo privado já configurado no Render pertence à mesma aplicação.
+- Como Access Token e Client Secret foram compartilhados na conversa, recomenda-se renová-los antes da ativação definitiva e cadastrar somente os valores renovados no Render.
+
+### Subagents
+- `backend_audit` — revisão de autenticação, autorização, pagamentos, integridade de exclusão, observabilidade e riscos de produção.
+- `frontend_audit` — revisão do painel atual, galerias, logo, animações, tokens e responsividade.
+- `test_audit` — revisão da suíte, cenários RED, casos extremos e riscos de regressão.
