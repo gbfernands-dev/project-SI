@@ -782,3 +782,52 @@ Mapear a arquitetura e as implementações existentes; avaliar trabalho paralelo
 - `backend_audit` — revisão de autenticação, autorização, pagamentos, integridade de exclusão, observabilidade e riscos de produção.
 - `frontend_audit` — revisão do painel atual, galerias, logo, animações, tokens e responsividade.
 - `test_audit` — revisão da suíte, cenários RED, casos extremos e riscos de regressão.
+
+## 2026-10-05 — Continuação autorizada da publicação em produção
+
+### Objetivo
+Publicar no serviço ativo do Render o commit validado da evolução administrativa, cadastrar as novas credenciais do Mercado Pago exclusivamente como segredos do ambiente e ativar o modo de produção após confirmar a saúde da nova versão.
+
+### Arquivos potencialmente envolvidos
+- `LOGS_IA.md` para rastreabilidade da publicação.
+- Histórico Git da branch `develop`, utilizada pelo serviço de produção; nenhum arquivo funcional deveria receber alteração adicional.
+
+### Abordagem
+Confirmar o workspace e o serviço alvo; mesclar as quatro credenciais privadas sem substituir variáveis existentes; avançar `develop` por fast-forward até o commit validado; acompanhar o deploy automático; validar página, catálogo, migração e health check; somente então ativar `MP_ENVIRONMENT=production` e os e-mails administrativos solicitados; repetir as validações e registrar o resultado.
+
+### Riscos e limitações
+- Alterações de variáveis no Render iniciam novo deploy mesmo sem mudança de código.
+- Nenhuma cobrança real seria criada como parte da validação.
+- O segredo de webhook existente seria preservado, mas seu valor não poderia ser lido ou comparado pelo conector.
+
+### Subagents
+- Não utilizados nesta continuação; a publicação exigia uma sequência dependente e monitorada pelo agente principal.
+
+## 2026-10-05 — Conclusão da publicação em produção
+
+### Resultado
+- Workspace `My Workspace` e serviço ativo `project-SI` confirmados; o serviço acompanha a branch `develop` e publica em `https://project-si-lxg5.onrender.com`.
+- As quatro credenciais do Mercado Pago foram mescladas no ambiente privado do Render sem gravar valores no repositório, nos logs do projeto ou nas respostas.
+- `develop` foi avançada por fast-forward até `f3397c2` e enviada ao GitHub; o deploy automático `dep-db1rg4pmgk9c73diss4g` terminou com estado `live`.
+- Após a primeira validação saudável, `MP_ENVIRONMENT=production`, `ADMIN_EMAIL=admin@admin.com` e `ATHLETICS_ADMIN_EMAIL=atletica@atletica.com` foram ativados sem substituir as demais variáveis. O deploy final `dep-db1rkl3tqb8s73ee411g` terminou com estado `live`.
+- A inicialização final executou Alembic sobre PostgreSQL e completou o startup da aplicação; o provisionamento idempotente das contas administrativas ocorreu durante esse startup com as senhas privadas já existentes no ambiente.
+
+### Arquivos alterados
+- `LOGS_IA.md` recebeu exclusivamente este registro de publicação.
+- Nenhum arquivo funcional foi alterado após o commit validado `f3397c2`.
+
+### Validações de produção
+- Endpoint `/api/v1/health` — `200`, resposta `{"message":"ok"}`.
+- Página inicial — `200`, assets com versão `20261005-1` confirmados.
+- Catálogo — `200`, um produto público, zero referências a guias de tamanho e zero produtos técnicos de validação de pagamento.
+- Render — migração PostgreSQL e startup concluídos; health checks consecutivos em `200`; nenhum log de nível `error` ou `critical` após a troca final da instância.
+- Nenhuma preferência ou cobrança real foi criada durante a publicação.
+
+### Limitações
+- O fluxo financeiro real não foi exercitado para evitar cobrança; a primeira transação deve ser acompanhada no Mercado Pago e no painel administrativo.
+- O segredo de assinatura do webhook foi preservado, mas ainda deve ser conferido no painel do Mercado Pago para garantir que pertence à mesma aplicação das credenciais ativadas.
+- Como Access Token e Client Secret foram compartilhados na conversa, permanece recomendada a renovação posterior e a troca direta no Render.
+- O serviço legado `Marketplace-Godzilla`, separado do serviço ativo e com configuração antiga, não foi alterado nem removido.
+
+### Subagents
+- Não utilizados nesta continuação.
